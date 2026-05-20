@@ -1,0 +1,197 @@
+<script setup lang="ts">
+import AppLayout from '@/layouts/AppLayout.vue';
+import { Head, Link, useForm } from '@inertiajs/vue3'
+import { onMounted, watch, computed } from 'vue'
+
+const props = defineProps<{
+  dataregistrasi: any, upts: any[], umums: any[], pidsuses: any[], pidums: any[], overstayings: any[],
+  integrasis: any[], identitases: any[], agamas: any[], pengeluarans: any[],
+  pendidikans: any[], detail_napis: any[], detail_tahanans: any[], petugases: any[],
+  pengunjungs: any[], wbp_dikunjungis: any[], wbp_vidcalls: any[], wbp_wartels: any[], barang_titipans: any[]
+}>()
+
+const form = useForm({
+  tanggal: props.dataregistrasi.tanggal || '',
+  upt_id: String(props.dataregistrasi.upt_id) || '',
+  
+  rekap_umum: props.dataregistrasi.rekap_umum || {},
+  rekap_pidsus: props.dataregistrasi.rekap_pidsus || {},
+  rekap_pidum: props.dataregistrasi.rekap_pidum || {},
+  rekap_overstaying: props.dataregistrasi.rekap_overstaying || {},
+  rekap_integrasi: props.dataregistrasi.rekap_integrasi || {},
+  rekap_identitas: props.dataregistrasi.rekap_identitas || {},
+  rekap_agama: props.dataregistrasi.rekap_agama || {},
+  rekap_pengeluaran: props.dataregistrasi.rekap_pengeluaran || {},
+  
+  rekap_pendidikan: props.dataregistrasi.rekap_pendidikan || {},
+  rekap_detail_napi: props.dataregistrasi.rekap_detail_napi || {},
+  rekap_detail_tahanan: props.dataregistrasi.rekap_detail_tahanan || {},
+  rekap_petugas: props.dataregistrasi.rekap_petugas || {},
+  rekap_pengunjung: props.dataregistrasi.rekap_pengunjung || {},
+  rekap_wbp_dikunjungi: props.dataregistrasi.rekap_wbp_dikunjungi || {},
+  rekap_wbp_vidcall: props.dataregistrasi.rekap_wbp_vidcall || {},
+  rekap_wbp_wartel: props.dataregistrasi.rekap_wbp_wartel || {},
+  rekap_barang_titipan: props.dataregistrasi.rekap_barang_titipan || {},
+})
+
+const idTahanan = computed(() => props.umums?.find(i => i.nama_registrasiumum.toLowerCase().includes('tahanan'))?.id);
+const idNapi = computed(() => props.umums?.find(i => i.nama_registrasiumum.toLowerCase().includes('napi') || i.nama_registrasiumum.toLowerCase().includes('narapidana'))?.id);
+const idKapasitas = computed(() => props.umums?.find(i => i.nama_registrasiumum.toLowerCase().includes('kapasitas'))?.id);
+const idTotalIsi = computed(() => props.umums?.find(i => i.nama_registrasiumum.toLowerCase().includes('total isi') || i.nama_registrasiumum.toLowerCase().includes('total_isi'))?.id);
+const idOvercrowded = computed(() => props.umums?.find(i => i.nama_registrasiumum.toLowerCase().includes('overcrowded'))?.id);
+const idWna = computed(() => props.umums?.find(i => i.nama_registrasiumum.toUpperCase().includes('WNA'))?.id);
+
+onMounted(() => {
+    props.umums?.forEach(item => { if (form.rekap_umum[item.id] === undefined) form.rekap_umum[item.id] = 0 })
+    props.pidsuses?.forEach(item => { if (form.rekap_pidsus[item.id] === undefined) form.rekap_pidsus[item.id] = 0 })
+    props.pidums?.forEach(item => { if (form.rekap_pidum[item.id] === undefined) form.rekap_pidum[item.id] = 0 })
+    props.overstayings?.forEach(item => { if (form.rekap_overstaying[item.id] === undefined) form.rekap_overstaying[item.id] = 0 })
+    props.integrasis?.forEach(item => { if (form.rekap_integrasi[item.id] === undefined) form.rekap_integrasi[item.id] = 0 })
+    props.identitases?.forEach(item => { if (form.rekap_identitas[item.id] === undefined) form.rekap_identitas[item.id] = 0 })
+    props.agamas?.forEach(item => { if (form.rekap_agama[item.id] === undefined) form.rekap_agama[item.id] = 0 })
+    props.pengeluarans?.forEach(item => { if (form.rekap_pengeluaran[item.id] === undefined) form.rekap_pengeluaran[item.id] = 0 })
+    
+    props.pendidikans?.forEach(item => { if (form.rekap_pendidikan[item.id] === undefined) form.rekap_pendidikan[item.id] = 0 })
+    props.detail_napis?.forEach(item => { if (form.rekap_detail_napi[item.id] === undefined) form.rekap_detail_napi[item.id] = 0 })
+    props.detail_tahanans?.forEach(item => { if (form.rekap_detail_tahanan[item.id] === undefined) form.rekap_detail_tahanan[item.id] = 0 })
+    props.petugases?.forEach(item => { if (form.rekap_petugas[item.id] === undefined) form.rekap_petugas[item.id] = 0 })
+    props.pengunjungs?.forEach(item => { if (form.rekap_pengunjung[item.id] === undefined) form.rekap_pengunjung[item.id] = 0 })
+    props.wbp_dikunjungis?.forEach(item => { if (form.rekap_wbp_dikunjungi[item.id] === undefined) form.rekap_wbp_dikunjungi[item.id] = 0 })
+    props.wbp_vidcalls?.forEach(item => { if (form.rekap_wbp_vidcall[item.id] === undefined) form.rekap_wbp_vidcall[item.id] = 0 })
+    props.wbp_wartels?.forEach(item => { if (form.rekap_wbp_wartel[item.id] === undefined) form.rekap_wbp_wartel[item.id] = 0 })
+    props.barang_titipans?.forEach(item => { if (form.rekap_barang_titipan[item.id] === undefined) form.rekap_barang_titipan[item.id] = 0 })
+    if(!form.rekap_umum['detail_wna']) form.rekap_umum['detail_wna'] = [];
+})
+
+function hitungTotalan() {
+    let totalTahanan = 0;
+    Object.values(form.rekap_detail_tahanan).forEach(val => { totalTahanan += Number(val) || 0; });
+    if (idTahanan.value) form.rekap_umum[idTahanan.value] = totalTahanan;
+
+    let totalNapi = 0;
+    Object.values(form.rekap_detail_napi).forEach(val => { totalNapi += Number(val) || 0; });
+    if (idNapi.value) form.rekap_umum[idNapi.value] = totalNapi;
+
+    const totalIsi = totalTahanan + totalNapi;
+    if (idTotalIsi.value) form.rekap_umum[idTotalIsi.value] = totalIsi;
+
+    const kapasitas = idKapasitas.value ? (Number(form.rekap_umum[idKapasitas.value]) || 0) : 0;
+    if (idOvercrowded.value) {
+        if (kapasitas > 0) {
+            const over = ((totalIsi - kapasitas) / kapasitas) * 100;
+            form.rekap_umum[idOvercrowded.value] = over.toFixed(2) + '%';
+        } else {
+            form.rekap_umum[idOvercrowded.value] = '0%';
+        }
+    }
+}
+
+watch(() => idWna.value ? form.rekap_umum[idWna.value] : null, (newVal) => {
+    const count = Number(newVal) || 0;
+    if (!form.rekap_umum['detail_wna']) form.rekap_umum['detail_wna'] = [];
+    if (form.rekap_umum['detail_wna'].length < count) {
+        while (form.rekap_umum['detail_wna'].length < count) { form.rekap_umum['detail_wna'].push({ status: 'Tahanan', negara: '' }); }
+    } else if (form.rekap_umum['detail_wna'].length > count) {
+        form.rekap_umum['detail_wna'].splice(count);
+    }
+});
+
+function submit() { form.put(`/admin/data-registrasis/${props.dataregistrasi.id}`) }
+</script>
+
+<template>
+  <Head title="Input Rekap Registrasi" />
+  <AppLayout>
+    <div class="flex h-full flex-1 flex-col gap-4 p-4 md:p-6 bg-background text-foreground">
+      <div class="flex items-center justify-between mb-2">
+        <div>
+            <h1 class="text-2xl font-semibold tracking-tight">Input Rekap Registrasi Harian</h1>
+            <p class="text-sm text-muted-foreground">Masukkan jumlah data WBP dan Kunjungan secara akurat.</p>
+        </div>
+        <Link href="/admin/data-registrasis" class="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium hover:bg-accent">Kembali</Link>
+      </div>
+
+      <form @submit.prevent="submit" class="space-y-6">
+        <div class="rounded-xl border border-border bg-card p-6 shadow-sm">
+            <div class="grid gap-6 md:grid-cols-2">
+                <div class="space-y-2">
+                    <label class="text-sm font-bold">Tanggal Laporan</label>
+                    <input v-model="form.tanggal" type="date" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
+                </div>
+                <div class="space-y-2">
+                    <label class="text-sm font-bold">Lokasi UPT (Lapas/Rutan)</label>
+                    <select v-model="form.upt_id" :disabled="upts.length === 1" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                        <option v-for="u in upts" :key="u.id" :value="String(u.id)">{{ u.name }}</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <h2 class="text-lg font-bold text-primary tracking-tight">A. DATA REGISTRASI & INDIKATOR UTAMA</h2>
+        <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <div class="rounded-xl border bg-card p-4 shadow-sm flex flex-col">
+                <h3 class="font-bold text-sm mb-3 border-b pb-2 text-primary">Data Registrasi Umum</h3>
+                <div class="flex-1 space-y-2">
+                    <div v-for="item in umums" :key="item.id" class="flex justify-between items-center bg-muted/30 p-2 rounded-md">
+                        <label class="text-xs font-medium">{{ item.nama_registrasiumum }}</label>
+                        <input v-model.number="form.rekap_umum[item.id]" type="number" min="0" class="w-16 h-7 rounded border px-2 text-xs text-right bg-background" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="rounded-xl border bg-card p-4 shadow-sm flex flex-col">
+                <h3 class="font-bold text-sm mb-3 border-b pb-2 text-purple-600">Tingkat Pendidikan</h3>
+                <div class="flex-1 space-y-2">
+                    <div v-for="item in pendidikans" :key="item.id" class="flex justify-between items-center bg-muted/30 p-2 rounded-md">
+                        <label class="text-xs font-medium">{{ item.nama_registrasipendidikan }}</label>
+                        <input v-model.number="form.rekap_pendidikan[item.id]" type="number" min="0" class="w-16 h-7 rounded border px-2 text-xs text-right bg-background" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="rounded-xl border bg-card p-4 shadow-sm flex flex-col">
+                <h3 class="font-bold text-sm mb-3 border-b pb-2 text-emerald-600">Detail Rekap Napi</h3>
+                <div class="flex-1 space-y-2">
+                    <div v-for="item in detail_napis" :key="item.id" class="flex justify-between items-center bg-muted/30 p-2 rounded-md">
+                        <label class="text-xs font-medium">{{ item.nama_registrasidetailnapi }}</label>
+                        <input v-model.number="form.rekap_detail_napi[item.id]" type="number" min="0" class="w-16 h-7 rounded border px-2 text-xs text-right bg-background" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="rounded-xl border bg-card p-4 shadow-sm flex flex-col">
+                <h3 class="font-bold text-sm mb-3 border-b pb-2 text-blue-600">Detail Rekap Tahanan</h3>
+                <div class="flex-1 space-y-2">
+                    <div v-for="item in detail_tahanans" :key="item.id" class="flex justify-between items-center bg-muted/30 p-2 rounded-md">
+                        <label class="text-xs font-medium">{{ item.nama_registrasidetailtahanan }}</label>
+                        <input v-model.number="form.rekap_detail_tahanan[item.id]" type="number" min="0" class="w-16 h-7 rounded border px-2 text-xs text-right bg-background" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="rounded-xl border bg-card p-4 shadow-sm flex flex-col"><h3 class="font-bold text-sm mb-3 border-b pb-2 text-red-600">Pidsus</h3><div class="space-y-2"><div v-for="item in pidsuses" :key="item.id" class="flex justify-between items-center bg-muted/30 p-2 rounded-md"><label class="text-xs font-medium">{{ item.nama_registrasipidsus }}</label><input v-model.number="form.rekap_pidsus[item.id]" type="number" min="0" class="w-16 h-7 rounded border px-2 text-xs text-right bg-background" /></div></div></div>
+            <div class="rounded-xl border bg-card p-4 shadow-sm flex flex-col"><h3 class="font-bold text-sm mb-3 border-b pb-2 text-orange-600">Pidum</h3><div class="space-y-2"><div v-for="item in pidums" :key="item.id" class="flex justify-between items-center bg-muted/30 p-2 rounded-md"><label class="text-xs font-medium">{{ item.nama_registrasipidum }}</label><input v-model.number="form.rekap_pidum[item.id]" type="number" min="0" class="w-16 h-7 rounded border px-2 text-xs text-right bg-background" /></div></div></div>
+            <div class="rounded-xl border bg-card p-4 shadow-sm flex flex-col"><h3 class="font-bold text-sm mb-3 border-b pb-2 text-amber-600">Overstaying</h3><div class="space-y-2"><div v-for="item in overstayings" :key="item.id" class="flex justify-between items-center bg-muted/30 p-2 rounded-md"><label class="text-xs font-medium">{{ item.nama_registrasioverstaying }}</label><input v-model.number="form.rekap_overstaying[item.id]" type="number" min="0" class="w-16 h-7 rounded border px-2 text-xs text-right bg-background" /></div></div></div>
+            <div class="rounded-xl border bg-card p-4 shadow-sm flex flex-col"><h3 class="font-bold text-sm mb-3 border-b pb-2 text-emerald-600">Integrasi</h3><div class="space-y-2"><div v-for="item in integrasis" :key="item.id" class="flex justify-between items-center bg-muted/30 p-2 rounded-md"><label class="text-xs font-medium">{{ item.nama_integrasi }}</label><input v-model.number="form.rekap_integrasi[item.id]" type="number" min="0" class="w-16 h-7 rounded border px-2 text-xs text-right bg-background" /></div></div></div>
+            <div class="rounded-xl border bg-card p-4 shadow-sm flex flex-col"><h3 class="font-bold text-sm mb-3 border-b pb-2 text-blue-600">Kependudukan</h3><div class="space-y-2"><div v-for="item in identitases" :key="item.id" class="flex justify-between items-center bg-muted/30 p-2 rounded-md"><label class="text-xs font-medium">{{ item.nama_registrasiidentitas }}</label><input v-model.number="form.rekap_identitas[item.id]" type="number" min="0" class="w-16 h-7 rounded border px-2 text-xs text-right bg-background" /></div></div></div>
+            <div class="rounded-xl border bg-card p-4 shadow-sm flex flex-col"><h3 class="font-bold text-sm mb-3 border-b pb-2 text-indigo-600">Agama</h3><div class="space-y-2"><div v-for="item in agamas" :key="item.id" class="flex justify-between items-center bg-muted/30 p-2 rounded-md"><label class="text-xs font-medium">{{ item.nama_agama }}</label><input v-model.number="form.rekap_agama[item.id]" type="number" min="0" class="w-16 h-7 rounded border px-2 text-xs text-right bg-background" /></div></div></div>
+            <div class="rounded-xl border bg-card p-4 shadow-sm flex flex-col"><h3 class="font-bold text-sm mb-3 border-b pb-2 text-teal-600">Pengeluaran</h3><div class="space-y-2"><div v-for="item in pengeluarans" :key="item.id" class="flex justify-between items-center bg-muted/30 p-2 rounded-md"><label class="text-xs font-medium">{{ item.nama_pengeluaran }}</label><input v-model.number="form.rekap_pengeluaran[item.id]" type="number" min="0" class="w-16 h-7 rounded border px-2 text-xs text-right bg-background" /></div></div></div>
+        </div>
+
+        <h2 class="text-lg font-bold text-orange-600 tracking-tight mt-6">B. DATA LAPORAN KUNJUNGAN HARIAN</h2>
+        <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <div class="rounded-xl border bg-card p-4 shadow-sm"><h3 class="font-bold text-sm mb-3 border-b pb-2 text-orange-600">Daftar Petugas</h3><div class="space-y-2"><div v-for="item in petugases" :key="item.id" class="flex justify-between items-center bg-muted/30 p-2 rounded-md"><label class="text-xs font-medium">{{ item.nama_registrasipetugas }}</label><input v-model.number="form.rekap_petugas[item.id]" type="number" min="0" class="w-16 h-7 rounded border px-2 text-xs text-right bg-background" /></div></div></div>
+            <div class="rounded-xl border bg-card p-4 shadow-sm"><h3 class="font-bold text-sm mb-3 border-b pb-2 text-orange-600">Daftar Pengunjung</h3><div class="space-y-2"><div v-for="item in pengunjungs" :key="item.id" class="flex justify-between items-center bg-muted/30 p-2 rounded-md"><label class="text-xs font-medium">{{ item.nama_registrasipengunjung }}</label><input v-model.number="form.rekap_pengunjung[item.id]" type="number" min="0" class="w-16 h-7 rounded border px-2 text-xs text-right bg-background" /></div></div></div>
+            <div class="rounded-xl border bg-card p-4 shadow-sm"><h3 class="font-bold text-sm mb-3 border-b pb-2 text-orange-600">WBP Dikunjungi</h3><div class="space-y-2"><div v-for="item in wbp_dikunjungis" :key="item.id" class="flex justify-between items-center bg-muted/30 p-2 rounded-md"><label class="text-xs font-medium">{{ item.nama_registrasiwbpdikunjungi }}</label><input v-model.number="form.rekap_wbp_dikunjungi[item.id]" type="number" min="0" class="w-16 h-7 rounded border px-2 text-xs text-right bg-background" /></div></div></div>
+            <div class="rounded-xl border bg-card p-4 shadow-sm"><h3 class="font-bold text-sm mb-3 border-b pb-2 text-orange-600">WBP Video Call</h3><div class="space-y-2"><div v-for="item in wbp_vidcalls" :key="item.id" class="flex justify-between items-center bg-muted/30 p-2 rounded-md"><label class="text-xs font-medium">{{ item.nama_registrasiwbpvidcall }}</label><input v-model.number="form.rekap_wbp_vidcall[item.id]" type="number" min="0" class="w-16 h-7 rounded border px-2 text-xs text-right bg-background" /></div></div></div>
+            <div class="rounded-xl border bg-card p-4 shadow-sm"><h3 class="font-bold text-sm mb-3 border-b pb-2 text-orange-600">WBP Wartel</h3><div class="space-y-2"><div v-for="item in wbp_wartels" :key="item.id" class="flex justify-between items-center bg-muted/30 p-2 rounded-md"><label class="text-xs font-medium">{{ item.nama_registrasiwbpwartel }}</label><input v-model.number="form.rekap_wbp_wartel[item.id]" type="number" min="0" class="w-16 h-7 rounded border px-2 text-xs text-right bg-background" /></div></div></div>
+            <div class="rounded-xl border bg-card p-4 shadow-sm"><h3 class="font-bold text-sm mb-3 border-b pb-2 text-orange-600">Barang Titipan</h3><div class="space-y-2"><div v-for="item in barang_titipans" :key="item.id" class="flex justify-between items-center bg-muted/30 p-2 rounded-md"><label class="text-xs font-medium">{{ item.nama_registrasibarangtitipan }}</label><input v-model.number="form.rekap_barang_titipan[item.id]" type="number" min="0" class="w-16 h-7 rounded border px-2 text-xs text-right bg-background" /></div></div></div>
+        </div>
+
+        <div class="flex justify-end pt-4 pb-8 border-t">
+            <button type="submit" :disabled="form.processing" class="inline-flex items-center justify-center rounded-xl bg-primary px-10 py-3 text-sm font-bold text-primary-foreground shadow-lg hover:opacity-90">Simpan Seluruh Laporan</button>
+        </div>
+      </form>
+    </div>
+  </AppLayout>
+</template>

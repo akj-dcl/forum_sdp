@@ -45,13 +45,6 @@ withDefaults(
                         >
                             Log in
                         </Link>
-                        <Link
-                            v-if="canRegister"
-                            :href="register()"
-                            class="px-6 py-2.5 text-sm font-semibold text-slate-900 transition-all duration-300 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-lg hover:from-yellow-300 hover:to-yellow-500 shadow-lg shadow-yellow-500/30"
-                        >
-                            Register
-                        </Link>
                     </template>
                 </nav>
             </header>

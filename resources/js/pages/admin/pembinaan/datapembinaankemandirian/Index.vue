@@ -172,16 +172,18 @@ function destroyData(id: number) {
           </div>
 
           <div class="col-span-2 mt-2" v-if="selectedData.dokumentasi_kegiatan?.length">
-            <h3 class="font-semibold mb-2">Dokumentasi ({{ selectedData.dokumentasi_kegiatan.length }} File)</h3>
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-              <div v-for="(file, index) in selectedData.dokumentasi_kegiatan" :key="index" class="relative aspect-video rounded-md overflow-hidden bg-black/10 border border-border">
-                <video v-if="isVideo(file)" :src="`/storage/${file}`" controls class="w-full h-full object-cover"></video>
-                <a v-else :href="`/storage/${file}`" target="_blank">
-                  <img :src="`/storage/${file}`" class="w-full h-full object-cover hover:scale-105 transition-transform" />
-                </a>
-              </div>
-            </div>
-          </div>
+  <h3 class="font-semibold mb-2">Dokumentasi ({{ selectedData.dokumentasi_kegiatan.length }} File)</h3>
+  <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+    <div v-for="(file, index) in selectedData.dokumentasi_kegiatan" :key="index" class="relative aspect-video rounded-md overflow-hidden bg-black/10 border border-border">
+      
+      <video v-if="isVideo(file)" :src="'/view-file?path=' + file" controls class="w-full h-full object-cover"></video>
+      <a v-else :href="'/view-file?path=' + file" target="_blank">
+        <img :src="'/view-file?path=' + file" class="w-full h-full object-cover hover:scale-105 transition-transform" />
+      </a>
+      
+    </div>
+  </div>
+</div>
         </div>
 
         <div class="mt-6 flex justify-end pt-4 border-t">

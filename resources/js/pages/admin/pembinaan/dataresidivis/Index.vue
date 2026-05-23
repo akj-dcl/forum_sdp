@@ -16,8 +16,8 @@ type DataResidivises = {
   jenis_pidana_sekarang_id: number
   lama_pidana_sekarang: string
   tempat_pidana_sekarang: string
-  berapa_kali_dipidana: number // Tambahan Baru
-  putusan_pengadilan: string | null // Tambahan Baru
+  berapa_kali_dipidana: number
+  putusan_pengadilan: string | null
   jenis_pidana_sebelumnya_id: number
   lama_pidana_sebelumnya: string
   tempat_pidana_sebelumnya: string
@@ -27,7 +27,6 @@ type DataResidivises = {
   jenis_pidana_sebelumnya?: JenisPidana
 }
 
-// SISA SCRIPT (Props, State Filter, Fungsi Modal, Watcher) SAMA PERSIS SEPERTI SEBELUMNYA
 type PaginationLink = { url: string | null; label: string; active: boolean }
 const props = defineProps<{ dataresidivises: { data: DataResidivises[], links: PaginationLink[], from: number, to: number, total: number }, upts: Upt[], filters: { search?: string, upt_id?: string, tanggal?: string } }>()
 const page = usePage()
@@ -131,7 +130,7 @@ function destroyDataResidivis(id: number) {
                       </div>
                       
                       <div v-if="selectedData.putusan_pengadilan" class="mt-3 pt-3">
-                          <a :href="`/storage/${selectedData.putusan_pengadilan}`" target="_blank" class="block text-center w-full bg-blue-600 text-white text-xs font-bold py-2 rounded shadow hover:bg-blue-700">Lihat PDF Putusan Pengadilan</a>
+                          <a :href="`/view-file?path=${selectedData.putusan_pengadilan}`" target="_blank" class="block text-center w-full bg-blue-600 text-white text-xs font-bold py-2 rounded shadow hover:bg-blue-700">Lihat PDF Putusan Pengadilan</a>
                       </div>
                   </div>
               </div>

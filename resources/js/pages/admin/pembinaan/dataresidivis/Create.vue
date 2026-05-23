@@ -32,7 +32,9 @@ function submit() {
     upt_id: Number(data.upt_id),
     jenis_pidana_sekarang_id: Number(data.jenis_pidana_sekarang_id),
     jenis_pidana_sebelumnya_id: Number(data.jenis_pidana_sebelumnya_id),
-  })).post('/admin/data-residivises')
+  })).post('/admin/data-residivises', {
+    forceFormData: true // 🛠️ DITAMBAHKAN AGAR FILE PDF TERBACA
+  })
 }
 </script>
 

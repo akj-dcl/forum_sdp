@@ -87,7 +87,7 @@ function isSelesai(status: string | null) {
 function fileUrl(path: string | null) {
     if (!path) return '#'
 
-    return `/storage/${path}`
+    return `${path}`
 }
 </script>
 
@@ -369,7 +369,7 @@ function fileUrl(path: string | null) {
                                 </p>
 
                                 <p class="text-lg font-black">
-                                    {{ selectedData?.masa_berlaku_mulai || '-' }}
+                                    {{selectedData?.masa_berlaku_mulai? selectedData.masa_berlaku_mulai.split('T')[0]: '-'}}
                                 </p>
                             </div>
 
@@ -379,7 +379,7 @@ function fileUrl(path: string | null) {
                                 </p>
 
                                 <p class="text-lg font-black">
-                                    {{ selectedData?.masa_berlaku_selesai || '-' }}
+                                    {{selectedData?.masa_berlaku_selesai? selectedData.masa_berlaku_selesai.split('T')[0]: '-'}}
                                 </p>
                             </div>
                         </div>

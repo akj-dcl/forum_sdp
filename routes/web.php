@@ -65,6 +65,10 @@ use App\Http\Controllers\Admin\DataPublikasiSdmController;
 use App\Http\Controllers\Admin\DataRealisasiAnggaranController;
 use App\Http\Controllers\Admin\DataMouPksController;
 use App\Http\Controllers\Admin\DataBookingRapatController;
+use App\Http\Controllers\FileStreamController;
+use App\Http\Controllers\Admin\DashboardPembinaanController;
+
+
 
 Route::inertia('/', 'Welcome', [
     'canRegister' => Features::enabled(Features::registration()),
@@ -73,6 +77,7 @@ Route::inertia('/', 'Welcome', [
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('dashboard', 'Dashboard')->name('dashboard');
 });
+Route::get('/view-file', [FileStreamController::class, 'show'])->name('view.file');
 
 Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
     //Controller Data Master
@@ -141,6 +146,7 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
     Route::resource('registrasi-detail-napis', RegistrasiDetailNapiController::class);
     Route::resource('registrasi-detail-tahanans', RegistrasiDetailTahananController::class);
 
+    Route::get('/pembinaan/dashboard', [DashboardPembinaanController::class, 'index'])->name('pembinaan.dashboard');
 
 });
 

@@ -121,22 +121,22 @@ function destroyData(id: number) {
               
               <div class="bg-blue-50/50 dark:bg-blue-900/10 p-3 rounded-lg border border-blue-100">
                   <p class="text-xs font-semibold mb-2">📄 Berita Acara Sidang (PDF)</p>
-                  <a :href="`/storage/${selectedData.berita_acara}`" target="_blank" class="text-blue-600 hover:underline text-xs">Download / Lihat PDF Berita Acara</a>
+                  <a :href="`/view-file?path=${selectedData.berita_acara}`" target="_blank" class="text-blue-600 hover:underline text-xs">Download / Lihat PDF Berita Acara</a>
               </div>
 
               <div class="bg-indigo-50/50 dark:bg-indigo-900/10 p-3 rounded-lg border border-indigo-100">
                   <p class="text-xs font-semibold mb-2">📋 Absensi Peserta (PDF)</p>
-                  <a :href="`/storage/${selectedData.absensi}`" target="_blank" class="text-indigo-600 hover:underline text-xs">Download / Lihat PDF Absensi</a>
+                  <a :href="`/view-file?path=${selectedData.absensi}`" target="_blank" class="text-indigo-600 hover:underline text-xs">Download / Lihat PDF Absensi</a>
               </div>
 
               <div class="bg-muted/30 p-3 rounded-lg border border-border">
-    <p class="text-xs font-semibold mb-2">🖼️ Dokumentasi Sidang ({{ selectedData.dokumentasi_sidang?.length || 0 }} Foto)</p>
-    <div class="grid grid-cols-3 gap-2">
-        <a v-for="(img, idx) in selectedData.dokumentasi_sidang" :key="idx" :href="`/storage/${img}`" target="_blank">
-            <img :src="`/storage/${img}`" class="w-full h-20 object-cover rounded border" />
-        </a>
-    </div>
-</div>
+                  <p class="text-xs font-semibold mb-2">🖼️ Dokumentasi Sidang ({{ selectedData.dokumentasi_sidang?.length || 0 }} Foto)</p>
+                  <div class="grid grid-cols-3 gap-2">
+                      <a v-for="(img, idx) in selectedData.dokumentasi_sidang" :key="idx" :href="`/view-file?path=${img}`" target="_blank">
+                          <img :src="`/view-file?path=${img}`" class="w-full h-20 object-cover rounded border" />
+                      </a>
+                  </div>
+              </div>
           </div>
 
         </div>

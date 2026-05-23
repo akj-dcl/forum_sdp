@@ -2,11 +2,13 @@
 
 namespace App\Providers;
 
-use Carbon\CarbonImmutable;
-use Illuminate\Support\Facades\Date;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Validation\Rules\Password;
+use Illuminate\Support\Facades\Storage;
+use Google\Client as GoogleClient;
+use Google\Service\Drive as GoogleDriveService;
+use Masbug\Flysystem\GoogleDriveAdapter;
+use League\Flysystem\Filesystem; // INI YANG TADI TYPO, SEKARANG SUDAH BENAR
+use Illuminate\Filesystem\FilesystemAdapter;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -23,28 +25,20 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        $this->configureDefaults();
-    }
+        // Sihir Penghubung PUSDAPAS ➔ Google Drive
+        Storage::extend('google', function ($app, $config) {
+            $client = new GoogleClient();
+            $client->setClientId($config['clientId']);
+            $client->setClientSecret($config['clientSecret']);
+            $client->refreshToken($config['refreshToken']);
 
-    /**
-     * Configure default behaviors for production-ready applications.
-     */
-    protected function configureDefaults(): void
-    {
-        Date::use(CarbonImmutable::class);
-
-        DB::prohibitDestructiveCommands(
-            app()->isProduction(),
-        );
-
-        Password::defaults(fn (): ?Password => app()->isProduction()
-            ? Password::min(12)
-                ->mixedCase()
-                ->letters()
-                ->numbers()
-                ->symbols()
-                ->uncompromised()
-            : null,
-        );
+            $service = new GoogleDriveService($client);
+            $adapter = new GoogleDriveAdapter($service, $config['folderId'] ?? '/', [
+                'useHasDir' => true
+            ]);
+            
+            $filesystem = new Filesystem($adapter);
+            return new FilesystemAdapter($filesystem, $adapter);
+        });
     }
 }

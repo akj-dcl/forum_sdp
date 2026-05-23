@@ -107,26 +107,26 @@ function submit() {
                             <input v-model="item.keterangan" type="text" placeholder="Catatan tambahan (misal: 2 orang bebas langsung)..." class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
                         </div>
                         <div class="md:col-span-5 space-y-2">
-    <label class="text-xs font-bold text-blue-600 uppercase">
-        Ganti SK Remisi (PDF)
-    </label>
+                            <label class="text-xs font-bold text-blue-600 uppercase">
+                                Ganti SK Remisi (PDF)
+                            </label>
 
-    <input
-        type="file"
-        accept="application/pdf"
-        @input="item.sk_remisi = $event.target.files[0]"
-        class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-    />
+                            <input
+                                type="file"
+                                accept="application/pdf"
+                                @input="item.sk_remisi = $event.target.files[0]"
+                                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                            />
 
-    <a
-        v-if="item.sk_remisi && typeof item.sk_remisi === 'string'"
-        :href="`/storage/${item.sk_remisi}`"
-        target="_blank"
-        class="text-xs text-blue-600 hover:underline"
-    >
-        📄 Lihat SK Saat Ini
-    </a>
-</div>
+                            <a
+                                v-if="item.sk_remisi && typeof item.sk_remisi === 'string'"
+                                :href="`/view-file?path=${item.sk_remisi}`"
+                                target="_blank"
+                                class="text-xs text-blue-600 hover:underline"
+                            >
+                                📄 Lihat SK Saat Ini
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -18,14 +18,12 @@ class DataRemisiController extends Controller
 
         $query = DataRemisi::with(['upt']);
 
-        // Filter berdasarkan UPT
         if ($user->upt_id) {
             $query->where('upt_id', $user->upt_id);
         } elseif ($request->upt_id) {
             $query->where('upt_id', $request->upt_id);
         }
 
-        // Filter berdasarkan Tanggal
         if ($request->tanggal) {
             $query->whereDate('tanggal_input', $request->tanggal);
         }
@@ -41,7 +39,7 @@ class DataRemisiController extends Controller
         return Inertia::render('admin/pembinaan/dataremisi/Index', [
             'dataremisis' => $dataremisis,
             'upts' => $upts,
-            'jenis_remisis' => $jenis_remisis, // Penting untuk Modal View
+            'jenis_remisis' => $jenis_remisis,
             'filters' => $request->only(['upt_id', 'tanggal'])
         ]);
     }
@@ -59,49 +57,40 @@ class DataRemisiController extends Controller
     }
 
     public function store(Request $request)
-{
-    $validated = $request->validate([
-        'upt_id' => 'required|exists:upts,id',
-        'tanggal_input' => 'required|date',
+    {
+        set_time_limit(300); // 🛠️ Perpanjang nafas server karena pakai Google Drive
 
-        'detail_remisi' => 'required|array|min:1',
+        $validated = $request->validate([
+            'upt_id' => 'required|exists:upts,id',
+            'tanggal_input' => 'required|date',
+            'detail_remisi' => 'required|array|min:1',
+            'detail_remisi.*.jenis_remisi_id' => 'required',
+            'detail_remisi.*.jumlah_diusulkan' => 'required|integer|min:0',
+            'detail_remisi.*.jumlah_remisi' => 'required|integer|min:0',
+            'detail_remisi.*.jumlah_selisih' => 'required|string',
+            'detail_remisi.*.keterangan' => 'nullable|string',
+            'detail_remisi.*.sk_remisi' => 'nullable|file|mimes:pdf|max:5120',
+        ]);
 
-        'detail_remisi.*.jenis_remisi_id' => 'required',
-        'detail_remisi.*.jumlah_diusulkan' => 'required|integer|min:0',
-        'detail_remisi.*.jumlah_remisi' => 'required|integer|min:0',
-        'detail_remisi.*.jumlah_selisih' => 'required|string',
-        'detail_remisi.*.keterangan' => 'nullable|string',
-
-        // TAMBAHAN
-        'detail_remisi.*.sk_remisi' => 'nullable|file|mimes:pdf|max:5120',
-    ]);
-
-    // Handle upload file
-    foreach ($validated['detail_remisi'] as $index => $item) {
-
-        if ($request->hasFile("detail_remisi.$index.sk_remisi")) {
-
-            $file = $request->file("detail_remisi.$index.sk_remisi");
-
-            $path = $file->store('remisi/sk', 'public');
-
-            $validated['detail_remisi'][$index]['sk_remisi'] = $path;
+        foreach ($validated['detail_remisi'] as $index => $item) {
+            if ($request->hasFile("detail_remisi.$index.sk_remisi")) {
+                $file = $request->file("detail_remisi.$index.sk_remisi");
+                // 🛠️ UBAH KE GOOGLE DRIVE
+                $path = $file->store('remisi/sk', 'google');
+                $validated['detail_remisi'][$index]['sk_remisi'] = $path;
+            }
         }
+
+        DataRemisi::create($validated);
+
+        return redirect()->route('data-remisis.index')->with('success', 'Laporan Remisi Harian berhasil disimpan ke Google Drive.');
     }
-
-    DataRemisi::create($validated);
-
-    return redirect()
-        ->route('data-remisis.index')
-        ->with('success', 'Laporan Remisi Harian berhasil ditambahkan.');
-}
 
     public function edit($id)
     {
         $dataremisi = DataRemisi::findOrFail($id);
         $user = auth()->user();
 
-        // Cek keamanan akses UPT
         if ($user->upt_id && $dataremisi->upt_id !== $user->upt_id) abort(403, 'Akses Ditolak!');
 
         $upts = $user->upt_id ? Upt::where('id', $user->upt_id)->get() : Upt::where('is_active', true)->get();
@@ -115,71 +104,59 @@ class DataRemisiController extends Controller
     }
 
     public function update(Request $request, $id)
-{
-    $dataremisi = DataRemisi::findOrFail($id);
+    {
+        set_time_limit(300); // 🛠️ Perpanjang nafas server
 
-    $validated = $request->validate([
-        'upt_id' => 'required|exists:upts,id',
-        'tanggal_input' => 'required|date',
+        $dataremisi = DataRemisi::findOrFail($id);
 
-        'detail_remisi' => 'required|array|min:1',
+        $validated = $request->validate([
+            'upt_id' => 'required|exists:upts,id',
+            'tanggal_input' => 'required|date',
+            'detail_remisi' => 'required|array|min:1',
+            'detail_remisi.*.jenis_remisi_id' => 'required',
+            'detail_remisi.*.jumlah_diusulkan' => 'required|integer|min:0',
+            'detail_remisi.*.jumlah_remisi' => 'required|integer|min:0',
+            'detail_remisi.*.jumlah_selisih' => 'required|string',
+            'detail_remisi.*.keterangan' => 'nullable|string',
+            'detail_remisi.*.sk_remisi' => 'nullable|file|mimes:pdf|max:5120',
+        ]);
 
-        'detail_remisi.*.jenis_remisi_id' => 'required',
-        'detail_remisi.*.jumlah_diusulkan' => 'required|integer|min:0',
-        'detail_remisi.*.jumlah_remisi' => 'required|integer|min:0',
-        'detail_remisi.*.jumlah_selisih' => 'required|string',
-        'detail_remisi.*.keterangan' => 'nullable|string',
+        foreach ($validated['detail_remisi'] as $index => $item) {
+            $validated['detail_remisi'][$index]['sk_remisi'] = $dataremisi->detail_remisi[$index]['sk_remisi'] ?? null;
 
-        // TAMBAHAN
-        'detail_remisi.*.sk_remisi' => 'nullable|file|mimes:pdf|max:5120',
-    ]);
+            if ($request->hasFile("detail_remisi.$index.sk_remisi")) {
+                $oldFile = $dataremisi->detail_remisi[$index]['sk_remisi'] ?? null;
 
-    foreach ($validated['detail_remisi'] as $index => $item) {
+                // 🛠️ HAPUS FILE LAMA DI GOOGLE DRIVE
+                if ($oldFile && Storage::disk('google')->exists($oldFile)) {
+                    Storage::disk('google')->delete($oldFile);
+                }
 
-        // default ambil file lama
-        $validated['detail_remisi'][$index]['sk_remisi'] =
-            $dataremisi->detail_remisi[$index]['sk_remisi'] ?? null;
-
-        // jika upload baru
-        if ($request->hasFile("detail_remisi.$index.sk_remisi")) {
-
-            // hapus file lama
-            $oldFile = $dataremisi->detail_remisi[$index]['sk_remisi'] ?? null;
-
-            if ($oldFile) {
-                Storage::disk('public')->delete($oldFile);
+                $file = $request->file("detail_remisi.$index.sk_remisi");
+                // 🛠️ UPLOAD FILE BARU KE GOOGLE DRIVE
+                $path = $file->store('remisi/sk', 'google');
+                $validated['detail_remisi'][$index]['sk_remisi'] = $path;
             }
-
-            $file = $request->file("detail_remisi.$index.sk_remisi");
-
-            $path = $file->store('remisi/sk', 'public');
-
-            $validated['detail_remisi'][$index]['sk_remisi'] = $path;
         }
+
+        $dataremisi->update($validated);
+
+        return redirect()->route('data-remisis.index')->with('success', 'Laporan Remisi Harian berhasil diperbarui di Google Drive.');
     }
-
-    $dataremisi->update($validated);
-
-    return redirect()
-        ->route('data-remisis.index')
-        ->with('success', 'Laporan Remisi Harian berhasil diperbarui.');
-}
 
     public function destroy($id)
-{
-    $dataremisi = DataRemisi::findOrFail($id);
+    {
+        $dataremisi = DataRemisi::findOrFail($id);
 
-    foreach ($dataremisi->detail_remisi as $item) {
-
-        if (!empty($item['sk_remisi'])) {
-            Storage::disk('public')->delete($item['sk_remisi']);
+        foreach ($dataremisi->detail_remisi as $item) {
+            // 🛠️ HAPUS FILE DARI GOOGLE DRIVE SAAT DATA DIHAPUS
+            if (!empty($item['sk_remisi']) && Storage::disk('google')->exists($item['sk_remisi'])) {
+                Storage::disk('google')->delete($item['sk_remisi']);
+            }
         }
+
+        $dataremisi->delete();
+
+        return redirect()->route('data-remisis.index')->with('success', 'Laporan Remisi Harian dan filenya berhasil dihapus.');
     }
-
-    $dataremisi->delete();
-
-    return redirect()
-        ->route('data-remisis.index')
-        ->with('success', 'Laporan Remisi Harian berhasil dihapus.');
-}
 }

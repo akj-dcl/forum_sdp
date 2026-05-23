@@ -58,7 +58,7 @@ class DataMouPksController extends Controller
         $validated = $request->validate([
             'kategori_pemrakarsa' => 'required|string',
             'upt_id' => 'nullable|exists:upts,id',
-            'judul_kerjasama' => 'required|string|max:255',
+            'judul_kerjasama' => 'required|string',
             'jenis_kerjasama' => 'required|string|max:255',
             'instansi_kerjasama' => 'required|string|max:255',
 

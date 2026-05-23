@@ -36,10 +36,20 @@ const formFinal = useForm({
 const formUpdateFinal = useForm({
     _method: 'put',
     is_update_final: 'yes',
-    masa_berlaku_mulai: props.datamoupks.masa_berlaku_mulai || '',
-    masa_berlaku_selesai: props.datamoupks.masa_berlaku_selesai || '',
+
+    masa_berlaku_mulai:
+        props.datamoupks.masa_berlaku_mulai
+            ? props.datamoupks.masa_berlaku_mulai.split('T')[0]
+            : '',
+
+    masa_berlaku_selesai:
+        props.datamoupks.masa_berlaku_selesai
+            ? props.datamoupks.masa_berlaku_selesai.split('T')[0]
+            : '',
+
     file_mou_pks: props.datamoupks.file_mou_pks || '',
-    dokumentasi_penandatanganan: props.datamoupks.dokumentasi_penandatanganan || '',
+    dokumentasi_penandatanganan:
+        props.datamoupks.dokumentasi_penandatanganan || '',
 })
 
 function safeParseJson(data: any) {

@@ -9,60 +9,47 @@ use Inertia\Inertia;
 use App\Models\Upt;
 use App\Models\JenisKepribadian;
 use Illuminate\Support\Facades\Storage;
-use Intervention\Image\ImageManager;
-use Intervention\Image\Drivers\Gd\Driver;
 
 class DataPembinaanKepribadianController extends Controller
 {
     public function index(Request $request)
     {
         $user = auth()->user(); 
-
-        // Modifikasi query untuk handle filter UPT
         $query = DataPembinaanKepribadian::with(['upt', 'jenis_kepribadian']);
 
-        // Jika user adalah admin UPT, paksa data hanya untuk UPT-nya saja
         if ($user->upt_id) {
             $query->where('upt_id', $user->upt_id);
         } else {
-            // Jika Super Admin/Kanwil, jalankan filter dari dropdown jika dipilih
             if ($request->upt_id) {
                 $query->where('upt_id', $request->upt_id);
             }
         }
 
-        // Filter pencarian nama kegiatan
         if ($request->search) {
             $query->where('nama_kegiatan', 'like', "%{$request->search}%");
         }
 
-        // TAMBAHAN: Filter by Tanggal
         if ($request->tanggal) {
             $query->whereDate('tanggal', $request->tanggal);
         }
 
         $data_pembinaan_kepribadian = $query->paginate(10)->withQueryString();
 
-        // Ambil data UPT untuk dropdown filter (Hanya tampilkan 1 jika user UPT)
         $upts = $user->upt_id 
             ? Upt::where('id', $user->upt_id)->get() 
             : Upt::where('is_active', true)->get();
 
         return Inertia::render('admin/pembinaan/datapembinaankepribadian/Index', [
             'datapembinaankepribadians' => $data_pembinaan_kepribadian,
-            'upts' => $upts, // Lempar data UPT ke Vue
-            'filters' => $request->only(['search', 'upt_id', 'tanggal']) // Lempar parameter upt_id
+            'upts' => $upts, 
+            'filters' => $request->only(['search', 'upt_id', 'tanggal'])
         ]);
     }
 
     public function create()
     {
         $user = auth()->user();
-
-        // Jika user punya upt_id, ambil 1 UPT saja. Jika Kanwil/Super Admin, ambil semua UPT.
-        $upts = $user->upt_id 
-            ? Upt::where('id', $user->upt_id)->get() 
-            : Upt::where('is_active', true)->get();
+        $upts = $user->upt_id ? Upt::where('id', $user->upt_id)->get() : Upt::where('is_active', true)->get();
 
         return Inertia::render('admin/pembinaan/datapembinaankepribadian/Create', [
             'upts' => $upts,
@@ -70,48 +57,52 @@ class DataPembinaanKepribadianController extends Controller
         ]);
     }
 
-   public function store(Request $request)
+    public function store(Request $request)
     {
         $validated = $request->validate([
             'tanggal' => 'required|date',
             'upt_id' => 'required|exists:upts,id',
             'jenis_kepribadian_id' => 'required|exists:jenis_kepribadians,id',
-            'detail_lain_lain' => 'nullable|string|max:255', // Validasi Baru
+            'detail_lain_lain' => 'nullable|string|max:255', 
             'nama_kegiatan' => 'required|string|max:255',
             'pemateri' => 'required|string|max:255',
             'jumlah_peserta' => 'required|integer|min:1',
             'hasil_kegiatan' => 'required|string',
             'rekomendasi_kegiatan' => 'nullable|string',
-            'dokumentasi_kegiatan.*' => 'nullable|file|mimes:jpg,jpeg,png,mp4,mov|max:5120',
+            'dokumentasi_kegiatan' => 'required|array',
+            'dokumentasi_kegiatan.*' => 'file|mimes:jpg,jpeg,png,mp4,mov|max:512000',
         ]);
 
+        $filePaths = [];
+
         if ($request->hasFile('dokumentasi_kegiatan')) {
-            $filePaths = [];
             foreach ($request->file('dokumentasi_kegiatan') as $file) {
-                $filePaths[] = $file->store('kepribadian/dokumentasi', 'public');
+                $ext = strtolower($file->getClientOriginalExtension());
+                $filename = time() . '_' . uniqid() . '.' . $ext;
+                
+                // Langsung tembak file asli ke Google Drive tanpa kompresi (Biar Cepat!)
+                $path = $file->storeAs('kepribadian/dokumentasi', $filename, 'google');
+                $filePaths[] = $path;
             }
-            $validated['dokumentasi_kegiatan'] = $filePaths;
         }
 
+        $validated['dokumentasi_kegiatan'] = $filePaths;
+
         DataPembinaanKepribadian::create($validated);
-        return redirect()->route('data-pembinaan-kepribadians.index')->with('success', 'Kegiatan berhasil ditambahkan.');
+        return redirect()->route('data-pembinaan-kepribadians.index')->with('success', 'Kegiatan kepribadian berhasil disimpan ke Google Drive.');
     }
 
-    // 1. Variabel di dalam kurung HARUS $data_pembinaan_kepribadian
     public function edit(DataPembinaanKepribadian $data_pembinaan_kepribadian)
     {
         $user = auth()->user();
 
         if ($user->upt_id && $data_pembinaan_kepribadian->upt_id !== $user->upt_id) {
-            abort(403, 'Akses Ditolak! Anda tidak dapat mengedit data Lapas lain.');
+            abort(403, 'Akses Ditolak!');
         }
 
-        $upts = $user->upt_id 
-            ? Upt::where('id', $user->upt_id)->get() 
-            : Upt::where('is_active', true)->get();
+        $upts = $user->upt_id ? Upt::where('id', $user->upt_id)->get() : Upt::where('is_active', true)->get();
 
         return Inertia::render('admin/pembinaan/datapembinaankepribadian/Edit', [
-            // 2. Nah, di sini kamu bebas pakai nama panjang untuk dikirim ke Vue
             'datapembinaankepribadians' => $data_pembinaan_kepribadian, 
             'upts' => $upts,
             'jenis_kepribadians' => JenisKepribadian::all(),
@@ -126,48 +117,55 @@ class DataPembinaanKepribadianController extends Controller
             'tanggal' => 'required|date',
             'upt_id' => 'required|exists:upts,id',
             'jenis_kepribadian_id' => 'required|exists:jenis_kepribadians,id',
-            'detail_lain_lain' => 'nullable|string|max:255', // Validasi Baru
+            'detail_lain_lain' => 'nullable|string|max:255', 
             'nama_kegiatan' => 'required|string|max:255',
             'pemateri' => 'required|string|max:255',
             'jumlah_peserta' => 'required|integer|min:1',
             'hasil_kegiatan' => 'required|string',
             'rekomendasi_kegiatan' => 'nullable|string',
-            'dokumentasi_kegiatan.*' => 'nullable|file|mimes:jpg,jpeg,png,mp4,mov|max:5120',
+            'dokumentasi_kegiatan' => 'nullable|array',
+            'dokumentasi_kegiatan.*' => 'file|mimes:jpg,jpeg,png,mp4,mov|max:204800',
         ]);
 
         if ($request->hasFile('dokumentasi_kegiatan')) {
-            // Hapus file lama
-            if ($kegiatan->dokumentasi_kegiatan) {
+            // Hapus file lama di Google Drive
+            if (!empty($kegiatan->dokumentasi_kegiatan)) {
                 foreach ($kegiatan->dokumentasi_kegiatan as $oldFile) {
-                    \Illuminate\Support\Facades\Storage::disk('public')->delete($oldFile);
+                    if (Storage::disk('google')->exists($oldFile)) {
+                        Storage::disk('google')->delete($oldFile);
+                    }
                 }
             }
-            // Simpan file baru
+            
+            // Simpan file baru langsung ke Google Drive
             $filePaths = [];
             foreach ($request->file('dokumentasi_kegiatan') as $file) {
-                $filePaths[] = $file->store('kepribadian/dokumentasi', 'public');
+                $ext = strtolower($file->getClientOriginalExtension());
+                $filename = time() . '_' . uniqid() . '.' . $ext;
+                $path = $file->storeAs('kepribadian/dokumentasi', $filename, 'google');
+                $filePaths[] = $path;
             }
             $validated['dokumentasi_kegiatan'] = $filePaths;
         } else {
-            unset($validated['dokumentasi_kegiatan']); // Jangan timpa jika kosong
+            unset($validated['dokumentasi_kegiatan']); 
         }
 
         $kegiatan->update($validated);
-        return redirect()->route('data-pembinaan-kepribadians.index')->with('success', 'Kegiatan berhasil diperbarui.');
+        return redirect()->route('data-pembinaan-kepribadians.index')->with('success', 'Kegiatan kepribadian berhasil diperbarui di Google Drive.');
     }
 
     public function destroy(DataPembinaanKepribadian $data_pembinaan_kepribadian)
     {
-        // Gunakan variabel yang benar
+        // Hapus file terkait dari Google Drive saat baris data dihapus
         if (!empty($data_pembinaan_kepribadian->dokumentasi_kegiatan)) {
             foreach ($data_pembinaan_kepribadian->dokumentasi_kegiatan as $file) {
-                Storage::disk('public')->delete($file);
+                if (Storage::disk('google')->exists($file)) {
+                    Storage::disk('google')->delete($file);
+                }
             }
         }
 
-        // Perbaiki pemanggilan fungsi delete()
         $data_pembinaan_kepribadian->delete();
-        
-        return redirect()->route('data-pembinaan-kepribadians.index')->with('success', 'Data Pembinaan Kepribadian berhasil dihapus.');
+        return redirect()->route('data-pembinaan-kepribadians.index')->with('success', 'Data Pembinaan Kepribadian berhasil dihapus beserta filenya.');
     }
 }

@@ -15,7 +15,6 @@ use App\Models\JenisIntegrasi;
 use App\Models\RegistrasiIdentitas;
 use App\Models\JenisAgama;
 use App\Models\JenisPengeluaran;
-// Import Model Baru
 use App\Models\RegistrasiPendidikan;
 use App\Models\RegistrasiDetailNapi;
 use App\Models\RegistrasiDetailTahanan;
@@ -39,7 +38,6 @@ class DataRegistrasiController extends Controller
             'identitases' => RegistrasiIdentitas::all(),
             'agamas' => JenisAgama::all(),
             'pengeluarans' => JenisPengeluaran::all(),
-            // Master Data Tambahan Baru
             'pendidikans' => RegistrasiPendidikan::all(),
             'detail_napis' => RegistrasiDetailNapi::all(),
             'detail_tahanans' => RegistrasiDetailTahanan::all(),
@@ -100,7 +98,6 @@ class DataRegistrasiController extends Controller
             'rekap_identitas' => 'nullable|array',
             'rekap_agama' => 'nullable|array',
             'rekap_pengeluaran' => 'nullable|array',
-            // Validasi Field Baru
             'rekap_pendidikan' => 'nullable|array',
             'rekap_detail_napi' => 'nullable|array',
             'rekap_detail_tahanan' => 'nullable|array',
@@ -146,7 +143,6 @@ class DataRegistrasiController extends Controller
             'rekap_identitas' => 'nullable|array',
             'rekap_agama' => 'nullable|array',
             'rekap_pengeluaran' => 'nullable|array',
-            // Validasi Field Baru
             'rekap_pendidikan' => 'nullable|array',
             'rekap_detail_napi' => 'nullable|array',
             'rekap_detail_tahanan' => 'nullable|array',

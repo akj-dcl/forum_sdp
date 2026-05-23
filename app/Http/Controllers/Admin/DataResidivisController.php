@@ -46,6 +46,8 @@ class DataResidivisController extends Controller
 
     public function store(Request $request)
     {
+        set_time_limit(300); // Perpanjang napas PHP
+
         $validated = $request->validate([
             'upt_id' => 'required|exists:upts,id',
             'tanggal'=> 'required|date',
@@ -63,11 +65,12 @@ class DataResidivisController extends Controller
         ]);
 
         if ($request->hasFile('putusan_pengadilan')) {
-            $validated['putusan_pengadilan'] = $request->file('putusan_pengadilan')->store('residivis/putusan', 'public');
+            // 🛠️ UPLOAD KE GOOGLE DRIVE
+            $validated['putusan_pengadilan'] = $request->file('putusan_pengadilan')->store('residivis/putusan', 'google');
         }
 
         DataResidivis::create($validated);
-        return redirect()->route('data-residivises.index')->with('success', 'Data Residivis berhasil ditambahkan.');
+        return redirect()->route('data-residivises.index')->with('success', 'Data Residivis berhasil ditambahkan ke Google Drive.');
     }
 
     public function edit($id)
@@ -90,6 +93,8 @@ class DataResidivisController extends Controller
 
     public function update(Request $request, $id)
     {
+        set_time_limit(300);
+
         $dataresidivis = DataResidivis::findOrFail($id);
         
         $validated = $request->validate([
@@ -109,26 +114,31 @@ class DataResidivisController extends Controller
         ]);
 
         if ($request->hasFile('putusan_pengadilan')) {
-            if ($dataresidivis->putusan_pengadilan) {
-                Storage::disk('public')->delete($dataresidivis->putusan_pengadilan);
+            // 🛠️ HAPUS FILE LAMA DI DRIVE
+            if ($dataresidivis->putusan_pengadilan && Storage::disk('google')->exists($dataresidivis->putusan_pengadilan)) {
+                Storage::disk('google')->delete($dataresidivis->putusan_pengadilan);
             }
-            $validated['putusan_pengadilan'] = $request->file('putusan_pengadilan')->store('residivis/putusan', 'public');
+            // 🛠️ UPLOAD FILE BARU KE DRIVE
+            $validated['putusan_pengadilan'] = $request->file('putusan_pengadilan')->store('residivis/putusan', 'google');
         } else {
-            unset($validated['putusan_pengadilan']); // Jangan hapus path lama jika tidak ada file baru
+            unset($validated['putusan_pengadilan']); 
         }
 
         $dataresidivis->update($validated);
-        return redirect()->route('data-residivises.index')->with('success', 'Data Residivis berhasil diperbarui.');
+        return redirect()->route('data-residivises.index')->with('success', 'Data Residivis berhasil diperbarui di Google Drive.');
     }
 
     public function destroy($id)
     {
         $dataresidivis = DataResidivis::findOrFail($id);
-        if ($dataresidivis->putusan_pengadilan) {
-            Storage::disk('public')->delete($dataresidivis->putusan_pengadilan);
+        
+        // 🛠️ HAPUS FILE DI DRIVE SAAT DATA DIHAPUS
+        if ($dataresidivis->putusan_pengadilan && Storage::disk('google')->exists($dataresidivis->putusan_pengadilan)) {
+            Storage::disk('google')->delete($dataresidivis->putusan_pengadilan);
         }
+        
         $dataresidivis->delete();
         
-        return redirect()->route('data-residivises.index')->with('success', 'Data Residivis berhasil dihapus.');
+        return redirect()->route('data-residivises.index')->with('success', 'Data Residivis dan file pendukungnya berhasil dihapus.');
     }
 }

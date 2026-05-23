@@ -64,7 +64,7 @@ class DataPembinaanKemandirianController extends Controller
         $validated = $request->validate([
             'upt_id' => 'required|exists:upts,id',
             'jenis_kemandirian_id' => 'required|exists:jenis_kemandirians,id',
-            'detail_lain_lain' => 'nullable|string|max:255', // Validasi Baru
+            'detail_lain_lain' => 'nullable|string|max:255',
             'tanggal'=> 'required|date',
             'nama_kegiatan' => 'required|string|max:255',
             'jumlah_peserta' => 'required|integer',
@@ -84,17 +84,23 @@ class DataPembinaanKemandirianController extends Controller
                 $filename = time() . '_' . uniqid() . '.' . $ext;
                 
                 if (in_array($ext, ['jpg', 'jpeg', 'png'])) {
-                    $folderPath = storage_path('app/public/dokumentasi');
-                    if (!file_exists($folderPath)) mkdir($folderPath, 0755, true);
-                    $path = $folderPath . '/' . $filename;
+                    // TRIK GOOGLE DRIVE: Simpan di folder temporary (sementara) server dulu
+                    $tempPath = sys_get_temp_dir() . '/' . $filename;
                     
                     $image = $manager->decodePath($file->getPathname());
                     $image->scale(width: 1200);
-                    $image->save($path, 75);
+                    $image->save($tempPath, 75); // Kompres dan simpan sementara
+                    
+                    // Tembak file yang sudah dikompres langsung ke Google Drive
+                    Storage::disk('google')->put('dokumentasi/' . $filename, file_get_contents($tempPath));
+                    
+                    // Hapus file sementara di server agar tidak menuhin disk
+                    unlink($tempPath);
                     
                     $filePaths[] = 'dokumentasi/' . $filename;
                 } else {
-                    $path = $file->storeAs('dokumentasi', $filename, 'public');
+                    // Jika file Video, langsung tembak ke Google Drive tanpa kompresi
+                    $path = $file->storeAs('dokumentasi', $filename, 'google');
                     $filePaths[] = $path;
                 }
             }
@@ -103,7 +109,7 @@ class DataPembinaanKemandirianController extends Controller
         $validated['dokumentasi_kegiatan'] = $filePaths;
         DataPembinaanKemandirian::create($validated);
 
-        return redirect()->route('data-pembinaan-kemandirians.index')->with('success', 'Data Pembinaan Kemandirian berhasil ditambahkan.');
+        return redirect()->route('data-pembinaan-kemandirians.index')->with('success', 'Data Pembinaan Kemandirian berhasil ditambahkan dan disimpan ke Google Drive.');
     }
 
     public function edit(DataPembinaanKemandirian $data_pembinaan_kemandirian)
@@ -128,7 +134,7 @@ class DataPembinaanKemandirianController extends Controller
         $validated = $request->validate([
             'upt_id' => 'required|exists:upts,id',
             'jenis_kemandirian_id' => 'required|exists:jenis_kemandirians,id',
-            'detail_lain_lain' => 'nullable|string|max:255', // Validasi Baru
+            'detail_lain_lain' => 'nullable|string|max:255',
             'tanggal'=> 'required|date',
             'nama_kegiatan' => 'required|string|max:255',
             'jumlah_peserta' => 'required|integer',
@@ -139,9 +145,12 @@ class DataPembinaanKemandirianController extends Controller
         ]);
 
         if ($request->hasFile('dokumentasi_kegiatan')) {
+            // Hapus file lama di Google Drive
             if (!empty($data_pembinaan_kemandirian->dokumentasi_kegiatan)) {
                 foreach ($data_pembinaan_kemandirian->dokumentasi_kegiatan as $oldFile) {
-                    Storage::disk('public')->delete($oldFile);
+                    if (Storage::disk('google')->exists($oldFile)) {
+                        Storage::disk('google')->delete($oldFile);
+                    }
                 }
             }
 
@@ -153,17 +162,18 @@ class DataPembinaanKemandirianController extends Controller
                 $filename = time() . '_' . uniqid() . '.' . $ext;
                 
                 if (in_array($ext, ['jpg', 'jpeg', 'png'])) {
-                    $folderPath = storage_path('app/public/dokumentasi');
-                    if (!file_exists($folderPath)) mkdir($folderPath, 0755, true);
-                    $path = $folderPath . '/' . $filename;
+                    $tempPath = sys_get_temp_dir() . '/' . $filename;
                     
                     $image = $manager->decodePath($file->getPathname());
                     $image->scale(width: 1200);
-                    $image->save($path, 75);
+                    $image->save($tempPath, 75);
+                    
+                    Storage::disk('google')->put('dokumentasi/' . $filename, file_get_contents($tempPath));
+                    unlink($tempPath);
                     
                     $filePaths[] = 'dokumentasi/' . $filename;
                 } else {
-                    $path = $file->storeAs('dokumentasi', $filename, 'public');
+                    $path = $file->storeAs('dokumentasi', $filename, 'google');
                     $filePaths[] = $path;
                 }
             }
@@ -174,18 +184,21 @@ class DataPembinaanKemandirianController extends Controller
         }
 
         $data_pembinaan_kemandirian->update($validated);
-        return redirect()->route('data-pembinaan-kemandirians.index')->with('success', 'Data Pembinaan Kemandirian berhasil diperbarui.');
+        return redirect()->route('data-pembinaan-kemandirians.index')->with('success', 'Data Pembinaan Kemandirian berhasil diperbarui di Google Drive.');
     }
 
     public function destroy(DataPembinaanKemandirian $data_pembinaan_kemandirian)
     {
+        // Hapus file di Google Drive saat data dihapus
         if (!empty($data_pembinaan_kemandirian->dokumentasi_kegiatan)) {
             foreach ($data_pembinaan_kemandirian->dokumentasi_kegiatan as $file) {
-                Storage::disk('public')->delete($file);
+                if (Storage::disk('google')->exists($file)) {
+                    Storage::disk('google')->delete($file);
+                }
             }
         }
 
         $data_pembinaan_kemandirian->delete();
-        return redirect()->route('data-pembinaan-kemandirians.index')->with('success', 'Data Pembinaan Kemandirian berhasil dihapus.');
+        return redirect()->route('data-pembinaan-kemandirians.index')->with('success', 'Data Pembinaan Kemandirian berhasil dihapus beserta filenya.');
     }
 }

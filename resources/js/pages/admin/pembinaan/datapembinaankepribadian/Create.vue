@@ -36,11 +36,12 @@ function handleFileChange(event: Event) {
   }
 }
 
+// Ganti fungsi submit() milikmu yang ada di dalam <script setup> dengan ini es:
 function submit() {
-  // Bersihkan detail_lain_lain jika yang dipilih ternyata bukan "Lain-lain"
   if (!isLainLain.value) form.detail_lain_lain = '';
   
   form.post('/admin/data-pembinaan-kepribadians', {
+    forceFormData: true, // 👈 INI KUNCINYA AGAR FILE TERUPLOAD
     preserveScroll: true,
     onError: (errors) => {
       console.log("Error Validasi:", errors);

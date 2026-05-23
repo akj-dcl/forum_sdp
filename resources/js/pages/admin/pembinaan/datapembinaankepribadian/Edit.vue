@@ -37,9 +37,14 @@ function handleFileChange(event: Event) {
   }
 }
 
+// Ganti fungsi submit() di Edit.vue dengan ini es:
 function submit() {
   if (!isLainLain.value) form.detail_lain_lain = '';
-  form.post(`/admin/data-pembinaan-kepribadians/${props.datapembinaankepribadians.id}`)
+  
+  form.post(`/admin/data-pembinaan-kepribadians/${props.datapembinaankepribadians.id}`, {
+    forceFormData: true, // 👈 WAJIB ADA SAAT UPDATE FILE MULTIPLE
+    preserveScroll: true
+  });
 }
 </script>
 

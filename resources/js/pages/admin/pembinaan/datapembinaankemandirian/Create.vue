@@ -35,10 +35,26 @@ function handleFileChange(event: Event) {
   }
 }
 
+// function submit() {
+//   if (!isLainLain.value) form.detail_lain_lain = '';
+  
+//   form.post('/admin/data-pembinaan-kemandirians', {
+//     preserveScroll: true,
+//     onError: (errors) => {
+//       console.log("Error Validasi:", errors);
+//       alert("Ada form yang belum diisi dengan benar! Cek pesan warna merah.");
+//     },
+//     onFinish: () => {
+//       form.processing = false; 
+//     }
+//   });
+// }
+
 function submit() {
   if (!isLainLain.value) form.detail_lain_lain = '';
   
   form.post('/admin/data-pembinaan-kemandirians', {
+    forceFormData: true, // WAJIB ADA AGAR MULTIPLE FILE TERBACA
     preserveScroll: true,
     onError: (errors) => {
       console.log("Error Validasi:", errors);

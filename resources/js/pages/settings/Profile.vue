@@ -65,7 +65,7 @@ const user = computed(() => page.props.auth.user);
                         <InputError class="mt-2" :message="errors.name" />
                     </div>
 
-                    <div class="grid gap-2">
+                    <!-- <div class="grid gap-2">
                         <Label for="email">Email address</Label>
                         <Input
                             id="email"
@@ -99,7 +99,7 @@ const user = computed(() => page.props.auth.user);
                             A new verification link has been sent to your email
                             address.
                         </div>
-                    </div>
+                    </div> -->
 
                     <div class="flex items-center gap-4">
                         <Button

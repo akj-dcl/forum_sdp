@@ -74,134 +74,69 @@ class DataPemindahanController extends Controller
 
     public function store(Request $request)
     {
+        set_time_limit(300); // Memberi napas panjang pada sistem saat lempar berkas ke Drive
+
         $validated = $request->validate([
             'upt_id' => 'required|exists:upts,id',
-
             'tanggal_input' => 'required|date',
-
             'tanggal_pelaksanaan' => 'required|date',
-
             'upt_asal_id' => 'required|exists:upts,id',
-
             'is_keluar_wilayah' => 'required|boolean',
-
-            'upt_tujuan_id' => $request->is_keluar_wilayah
-                ? 'nullable'
-                : 'required|exists:upts,id',
-
-            'tujuan_luar_wilayah' => $request->is_keluar_wilayah
-                ? 'required|string|max:255'
-                : 'nullable|string|max:255',
-
+            'upt_tujuan_id' => $request->is_keluar_wilayah ? 'nullable' : 'required|exists:upts,id',
+            'tujuan_luar_wilayah' => $request->is_keluar_wilayah ? 'required|string|max:255' : 'nullable|string|max:255',
             'jenis_pemindahan_id' => 'required|exists:jenis_pemindahans,id',
-
             'detail_lain_lain' => 'nullable|string',
-
             'jenis_kasus' => 'nullable|string|max:255',
-
             'jumlah_personel' => 'nullable|array',
-
             'surat_usulan' => 'required|file|mimes:pdf|max:5120',
-
             'surat_persetujuan' => 'required|file|mimes:pdf|max:5120',
-
-            'laporan_pemindahan' => 'nullable|file|mimes:pdf|max:5120',
-
-            'foto_pemindahan.*' => 'nullable|image|mimes:jpg,jpeg,png|max:5120',
+            'laporan_pemindahan' => 'required|file|mimes:pdf|max:5120', // Menjadikan wajib diisi
+            'foto_pemindahan.*' => 'nullable|image|mimes:jpg,jpeg,png|max:51200',
         ]);
 
-        /*
-        |--------------------------------------------------------------------------
-        | Fix tujuan wilayah
-        |--------------------------------------------------------------------------
-        */
-
         if ($request->is_keluar_wilayah) {
-
             $validated['upt_tujuan_id'] = null;
-
         } else {
-
             $validated['tujuan_luar_wilayah'] = null;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Upload Surat Usulan
-        |--------------------------------------------------------------------------
-        */
-
+        // Upload Surat Usulan ke Google Drive
         if ($request->hasFile('surat_usulan')) {
-
-            $validated['surat_usulan'] = $request
-                ->file('surat_usulan')
-                ->store('pemindahan/usulan', 'public');
+            $validated['surat_usulan'] = $request->file('surat_usulan')->store('pemindahan/usulan', 'google');
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Upload Surat Persetujuan
-        |--------------------------------------------------------------------------
-        */
-
+        // Upload Surat Persetujuan ke Google Drive
         if ($request->hasFile('surat_persetujuan')) {
-
-            $validated['surat_persetujuan'] = $request
-                ->file('surat_persetujuan')
-                ->store('pemindahan/persetujuan', 'public');
+            $validated['surat_persetujuan'] = $request->file('surat_persetujuan')->store('pemindahan/persetujuan', 'google');
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Upload Laporan Pemindahan
-        |--------------------------------------------------------------------------
-        */
-
+        // Upload Laporan Pemindahan ke Google Drive
         if ($request->hasFile('laporan_pemindahan')) {
-
-            $validated['laporan_pemindahan'] = $request
-                ->file('laporan_pemindahan')
-                ->store('pemindahan/laporan', 'public');
+            $validated['laporan_pemindahan'] = $request->file('laporan_pemindahan')->store('pemindahan/laporan', 'google');
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Upload Multi Foto
-        |--------------------------------------------------------------------------
-        */
-
+        // Upload Multi Foto ke Google Drive tanpa kompresi memberatkan
         $fotoPaths = [];
-
         if ($request->hasFile('foto_pemindahan')) {
-
             foreach ($request->file('foto_pemindahan') as $foto) {
-
-                $fotoPaths[] = $foto->store(
-                    'pemindahan/foto',
-                    'public'
-                );
+                $fotoPaths[] = $foto->store('pemindahan/foto', 'google');
             }
         }
-
         $validated['foto_pemindahan'] = $fotoPaths;
 
         DataPemindahan::create($validated);
 
         return redirect()
             ->route('data-pemindahans.index')
-            ->with('success', 'Data Pemindahan berhasil ditambahkan.');
+            ->with('success', 'Data Pemindahan WBP berhasil disimpan ke Google Drive.');
     }
 
     public function edit($id)
     {
         $datapemindahan = DataPemindahan::findOrFail($id);
-
         $user = auth()->user();
 
-        if (
-            $user->upt_id &&
-            $datapemindahan->upt_id !== $user->upt_id
-        ) {
+        if ($user->upt_id && $datapemindahan->upt_id !== $user->upt_id) {
             abort(403, 'Akses Ditolak!');
         }
 
@@ -222,152 +157,74 @@ class DataPemindahanController extends Controller
 
     public function update(Request $request, $id)
     {
+        set_time_limit(300);
+
         $datapemindahan = DataPemindahan::findOrFail($id);
 
         $validated = $request->validate([
             'upt_id' => 'required|exists:upts,id',
-
             'tanggal_input' => 'required|date',
-
             'tanggal_pelaksanaan' => 'required|date',
-
             'upt_asal_id' => 'required|exists:upts,id',
-
             'is_keluar_wilayah' => 'required|boolean',
-
-            'upt_tujuan_id' => $request->is_keluar_wilayah
-                ? 'nullable'
-                : 'required|exists:upts,id',
-
-            'tujuan_luar_wilayah' => $request->is_keluar_wilayah
-                ? 'required|string|max:255'
-                : 'nullable|string|max:255',
-
+            'upt_tujuan_id' => $request->is_keluar_wilayah ? 'nullable' : 'required|exists:upts,id',
+            'tujuan_luar_wilayah' => $request->is_keluar_wilayah ? 'required|string|max:255' : 'nullable|string|max:255',
             'jenis_pemindahan_id' => 'required|exists:jenis_pemindahans,id',
-
             'detail_lain_lain' => 'nullable|string',
-
             'jenis_kasus' => 'nullable|string|max:255',
-
             'jumlah_personel' => 'nullable|array',
-
             'surat_usulan' => 'nullable|file|mimes:pdf|max:5120',
-
             'surat_persetujuan' => 'nullable|file|mimes:pdf|max:5120',
-
             'laporan_pemindahan' => 'nullable|file|mimes:pdf|max:5120',
-
-            'foto_pemindahan.*' => 'nullable|image|mimes:jpg,jpeg,png|max:5120',
+            'foto_pemindahan.*' => 'nullable|image|mimes:jpg,jpeg,png|max:51200',
         ]);
 
-        /*
-        |--------------------------------------------------------------------------
-        | Fix tujuan wilayah
-        |--------------------------------------------------------------------------
-        */
-
         if ($request->is_keluar_wilayah) {
-
             $validated['upt_tujuan_id'] = null;
-
         } else {
-
             $validated['tujuan_luar_wilayah'] = null;
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Prevent overwrite null
-        |--------------------------------------------------------------------------
-        */
 
         unset($validated['surat_usulan']);
         unset($validated['surat_persetujuan']);
         unset($validated['laporan_pemindahan']);
 
-        /*
-        |--------------------------------------------------------------------------
-        | Update Surat Usulan
-        |--------------------------------------------------------------------------
-        */
-
+        // Update Surat Usulan di Drive
         if ($request->hasFile('surat_usulan')) {
-
-            if ($datapemindahan->surat_usulan) {
-
-                Storage::disk('public')
-                    ->delete($datapemindahan->surat_usulan);
+            if ($datapemindahan->surat_usulan && Storage::disk('google')->exists($datapemindahan->surat_usulan)) {
+                Storage::disk('google')->delete($datapemindahan->surat_usulan);
             }
-
-            $validated['surat_usulan'] = $request
-                ->file('surat_usulan')
-                ->store('pemindahan/usulan', 'public');
+            $validated['surat_usulan'] = $request->file('surat_usulan')->store('pemindahan/usulan', 'google');
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Update Surat Persetujuan
-        |--------------------------------------------------------------------------
-        */
-
+        // Update Surat Persetujuan di Drive
         if ($request->hasFile('surat_persetujuan')) {
-
-            if ($datapemindahan->surat_persetujuan) {
-
-                Storage::disk('public')
-                    ->delete($datapemindahan->surat_persetujuan);
+            if ($datapemindahan->surat_persetujuan && Storage::disk('google')->exists($datapemindahan->surat_persetujuan)) {
+                Storage::disk('google')->delete($datapemindahan->surat_persetujuan);
             }
-
-            $validated['surat_persetujuan'] = $request
-                ->file('surat_persetujuan')
-                ->store('pemindahan/persetujuan', 'public');
+            $validated['surat_persetujuan'] = $request->file('surat_persetujuan')->store('pemindahan/persetujuan', 'google');
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Update Laporan Pemindahan
-        |--------------------------------------------------------------------------
-        */
-
+        // Update Laporan Pemindahan di Drive
         if ($request->hasFile('laporan_pemindahan')) {
-
-            if ($datapemindahan->laporan_pemindahan) {
-
-                Storage::disk('public')
-                    ->delete($datapemindahan->laporan_pemindahan);
+            if ($datapemindahan->laporan_pemindahan && Storage::disk('google')->exists($datapemindahan->laporan_pemindahan)) {
+                Storage::disk('google')->delete($datapemindahan->laporan_pemindahan);
             }
-
-            $validated['laporan_pemindahan'] = $request
-                ->file('laporan_pemindahan')
-                ->store('pemindahan/laporan', 'public');
+            $validated['laporan_pemindahan'] = $request->file('laporan_pemindahan')->store('pemindahan/laporan', 'google');
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Update Multi Foto
-        |--------------------------------------------------------------------------
-        */
-
+        // Update Multi Foto di Drive
         if ($request->hasFile('foto_pemindahan')) {
-
             if (is_array($datapemindahan->foto_pemindahan)) {
-
                 foreach ($datapemindahan->foto_pemindahan as $foto) {
-
-                    Storage::disk('public')->delete($foto);
+                    if (Storage::disk('google')->exists($foto)) Storage::disk('google')->delete($foto);
                 }
             }
 
             $fotoPaths = [];
-
             foreach ($request->file('foto_pemindahan') as $foto) {
-
-                $fotoPaths[] = $foto->store(
-                    'pemindahan/foto',
-                    'public'
-                );
+                $fotoPaths[] = $foto->store('pemindahan/foto', 'google');
             }
-
             $validated['foto_pemindahan'] = $fotoPaths;
         }
 
@@ -375,42 +232,28 @@ class DataPemindahanController extends Controller
 
         return redirect()
             ->route('data-pemindahans.index')
-            ->with('success', 'Data Pemindahan berhasil diperbarui.');
+            ->with('success', 'Data Pemindahan berhasil diperbarui di Google Drive.');
     }
 
     public function destroy($id)
     {
         $datapemindahan = DataPemindahan::findOrFail($id);
 
-        /*
-        |--------------------------------------------------------------------------
-        | Hapus file
-        |--------------------------------------------------------------------------
-        */
-
-        if ($datapemindahan->surat_usulan) {
-
-            Storage::disk('public')
-                ->delete($datapemindahan->surat_usulan);
+        if ($datapemindahan->surat_usulan && Storage::disk('google')->exists($datapemindahan->surat_usulan)) {
+            Storage::disk('google')->delete($datapemindahan->surat_usulan);
         }
 
-        if ($datapemindahan->surat_persetujuan) {
-
-            Storage::disk('public')
-                ->delete($datapemindahan->surat_persetujuan);
+        if ($datapemindahan->surat_persetujuan && Storage::disk('google')->exists($datapemindahan->surat_persetujuan)) {
+            Storage::disk('google')->delete($datapemindahan->surat_persetujuan);
         }
 
-        if ($datapemindahan->laporan_pemindahan) {
-
-            Storage::disk('public')
-                ->delete($datapemindahan->laporan_pemindahan);
+        if ($datapemindahan->laporan_pemindahan && Storage::disk('google')->exists($datapemindahan->laporan_pemindahan)) {
+            Storage::disk('google')->delete($datapemindahan->laporan_pemindahan);
         }
 
         if (is_array($datapemindahan->foto_pemindahan)) {
-
             foreach ($datapemindahan->foto_pemindahan as $foto) {
-
-                Storage::disk('public')->delete($foto);
+                if (Storage::disk('google')->exists($foto)) Storage::disk('google')->delete($foto);
             }
         }
 
@@ -418,6 +261,6 @@ class DataPemindahanController extends Controller
 
         return redirect()
             ->route('data-pemindahans.index')
-            ->with('success', 'Data Pemindahan berhasil dihapus.');
+            ->with('success', 'Data Pemindahan beserta seluruh berkas berhasil dihapus dari Google Drive.');
     }
 }

@@ -19,6 +19,7 @@ import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
 
 const page = usePage();
+
 // Mengambil data role dari Inertia
 const userRoles = computed(() => page.props.auth?.user?.role || []);
 
@@ -100,7 +101,8 @@ const kanwilNavItems: NavItem[] = [
     },
 ];
 
-const uptNavItems: NavItem[] = [
+// Base Array untuk Menu UPT
+const baseUptNavItems: NavItem[] = [
     {
         title: 'Dashboard',
         href: '/dashboard',
@@ -110,11 +112,12 @@ const uptNavItems: NavItem[] = [
         title: 'Pembinaan',
         icon: HandPlatter,
         children: [
+            { title: 'Dashboard Pembinaan', href: '/admin/pembinaan/dashboard' },
             { title: 'Registrasi', href: '/admin/data-registrasis' },
             { title: 'Residivis', href: '/admin/data-residivises' },
             {
                 title: 'Pembinaan',
-                href: '/pembinaan/dashboard',
+                // 🛠️ Href dihapus dari sini agar dropdown berfungsi dengan baik
                 children: [
                     { title: 'Kepribadian', href: '/admin/data-pembinaan-kepribadians' },
                     { title: 'Kemandirian', href: '/admin/data-pembinaan-kemandirians' },
@@ -220,9 +223,25 @@ const uptNavItems: NavItem[] = [
     },
 ];
 
+// 🛠️ FILTER CERDAS UNTUK MENAMPILKAN MENU SESUAI ROLE
+const filteredUptNavItems = computed(() => {
+    // 1. Jika Super Admin, Admin Kanwil, atau Admin UPT -> Tampilkan Semua
+    if (hasRole('Super Admin') || hasRole('Admin Kanwil') || hasRole('Admin UPT')) {
+        return baseUptNavItems;
+    }
+
+    // 2. Jika Admin Pembinaan atau Operator Pembinaan -> Tampilkan Dashboard & Pembinaan Saja
+    if (hasRole('Admin Pembinaan') || hasRole('Operator Pembinaan')) {
+        return baseUptNavItems.filter(item => item.title === 'Pembinaan');
+    }
+
+    // Default jika tidak punya role di atas (kosongkan)
+    return [];
+});
+
 const footerNavItems: NavItem[] = [
-    { title: 'Github Repo', href: 'https://github.com/laravel/vue-starter-kit', icon: FolderGit2 },
-    { title: 'Documentation', href: 'https://laravel.com/docs/starter-kits#vue', icon: BookOpen },
+    // { title: 'Github Repo', href: 'https://github.com/laravel/vue-starter-kit', icon: FolderGit2 },
+    // { title: 'Documentation', href: 'https://laravel.com/docs/starter-kits#vue', icon: BookOpen },
 ]
 
 </script>
@@ -230,9 +249,6 @@ const footerNavItems: NavItem[] = [
 <template>
     <Sidebar collapsible="icon" variant="inset">
         <SidebarHeader>
-            <!-- <div class="p-4 text-xs bg-red-100 text-red-800 break-words">
-                DEBUG ROLE: {{ userRoles }}
-            </div> -->
             <SidebarMenu>
                 <SidebarMenuItem>
                     <SidebarMenuButton size="lg" as-child>
@@ -253,9 +269,9 @@ const footerNavItems: NavItem[] = [
             />
 
             <NavMain 
-                v-if="hasRole('Super Admin') || hasRole('Admin Kanwil') || hasRole('Admin UPT')"
+                v-if="filteredUptNavItems.length > 0"
                 title="Menu UPT" 
-                :items="uptNavItems" 
+                :items="filteredUptNavItems" 
                 :key="'upt-' + $page.url" 
             />
         </SidebarContent>

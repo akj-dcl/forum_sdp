@@ -12,8 +12,8 @@ class DataMouPks extends Model
 
     protected $casts = [
         'riwayat_tahapan' => 'array',
-        'masa_berlaku_mulai' => 'date',
-        'masa_berlaku_selesai' => 'date',
+        'masa_berlaku_mulai' => 'date:Y-m-d',
+        'masa_berlaku_selesai' => 'date:Y-m-d',
     ];
 
     /*

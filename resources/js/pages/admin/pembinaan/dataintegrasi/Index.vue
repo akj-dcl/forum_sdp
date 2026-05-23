@@ -75,7 +75,7 @@ function destroyData(id: number) {
               <tr v-for="d in dataintegrasis.data" :key="d.id" class="border-b transition-colors hover:bg-muted/50">
                 <td class="p-4 font-bold text-primary">{{ d.tanggal_input }}</td>
                 <td class="p-4 text-muted-foreground">{{ d.upt?.name ?? '-' }}</td>
-                <td class="p-4 text-center font-medium">{{ d.jumlah_pb + d.jumlah_cb + d.jumlah_cmb + d.jumlah_asimilasi }} Orang</td>
+                <td class="p-4 text-center font-medium">{{ d.jumlah_pb + d.jumlah_cb + d.jumlah_cmb + d.jumlah_asimilasi + d.jumlah_bebas_murni + d.jumlah_cmk }} Orang</td>
                 <td class="p-4 text-right align-middle">
                   <div class="flex justify-end gap-2">
                     <button @click="showDetail(d)" class="inline-flex items-center rounded-md text-sm font-medium border border-input bg-transparent hover:bg-blue-50 hover:text-blue-600 h-8 px-3">Lihat</button>
@@ -98,26 +98,33 @@ function destroyData(id: number) {
             <button @click="closeModal" class="text-muted-foreground hover:text-foreground">&times; Tutup</button>
         </div>
         
-        <div v-if="selectedData" class="grid gap-6 md:grid-cols-2 lg:grid-cols-4 text-sm">
-            <div v-for="jenis in [{key: 'pb', label: 'Pembebasan Bersyarat (PB)', color: 'blue'}, {key: 'cb', label: 'Cuti Bersyarat (CB)', color: 'orange'}, {key: 'cmb', label: 'Cuti Menjelang Bebas (CMB)', color: 'emerald'}, {key: 'asimilasi', label: 'Asimilasi', color: 'indigo'}]" :key="jenis.key" class="bg-muted/30 p-4 rounded-lg border">
+        <div v-if="selectedData" class="grid gap-6 md:grid-cols-2 lg:grid-cols-3 text-sm">
+            <div v-for="jenis in [
+                {key: 'pb', label: 'Pembebasan Bersyarat (PB)', color: 'blue'}, 
+                {key: 'cb', label: 'Cuti Bersyarat (CB)', color: 'orange'}, 
+                {key: 'cmb', label: 'Cuti Menjelang Bebas (CMB)', color: 'emerald'}, 
+                {key: 'asimilasi', label: 'Asimilasi', color: 'indigo'},
+                {key: 'bebas_murni', label: 'Bebas Murni', color: 'red'},
+                {key: 'cmk', label: 'Cuti Menjelang Keluarga (CMK)', color: 'purple'}
+              ]" :key="jenis.key" class="bg-muted/30 p-4 rounded-lg border"
+            >
                 <h3 :class="`font-bold text-${jenis.color}-600 mb-3 border-b pb-2`">{{ jenis.label }}</h3>
                 <div class="space-y-3">
-                    <div><p class="text-xs text-muted-foreground">Tgl Pelaksanaan</p><p class="font-medium">{{ selectedData[`tanggal_pelaksanaan_${jenis.key}`] }}</p></div>
-                    <div><p class="text-xs text-muted-foreground">Jumlah Orang</p><p class="font-bold text-lg">{{ selectedData[`jumlah_${jenis.key}`] }}</p></div>
+                    <div class="flex justify-between">
+                        <div><p class="text-xs text-muted-foreground">Tgl Pelaksanaan</p><p class="font-medium">{{ selectedData[`tanggal_pelaksanaan_${jenis.key}`] }}</p></div>
+                        <div class="text-right"><p class="text-xs text-muted-foreground">Jml Orang</p><p class="font-bold text-lg">{{ selectedData[`jumlah_${jenis.key}`] }}</p></div>
+                    </div>
                     
-                    <div class="grid grid-cols-2 gap-2 mt-2">
-  <a
-    v-for="(foto, index) in selectedData[`dokumentasi_${jenis.key}`]"
-    :key="index"
-    :href="`/storage/${foto}`"
-    target="_blank"
-  >
-    <img
-      :src="`/storage/${foto}`"
-      class="w-full h-24 object-cover rounded border hover:opacity-80"
-    />
-  </a>
-</div>
+                    <div class="pt-2 border-t">
+                        <a v-if="selectedData[`sk_${jenis.key}`]" :href="`/view-file?path=${selectedData[`sk_${jenis.key}`]}`" target="_blank" class="text-blue-600 font-semibold text-xs hover:underline">📄 Lihat File SK PDF</a>
+                        <span v-else class="text-xs text-red-500 italic">SK Belum Diupload</span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 mt-2 pt-2 border-t">
+                      <a v-for="(foto, index) in selectedData[`dokumentasi_${jenis.key}`]" :key="index" :href="`/view-file?path=${foto}`" target="_blank">
+                        <img :src="`/view-file?path=${foto}`" class="w-full h-24 object-cover rounded border hover:opacity-80" />
+                      </a>
+                    </div>
                 </div>
             </div>
         </div>

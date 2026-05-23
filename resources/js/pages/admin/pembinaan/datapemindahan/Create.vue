@@ -63,9 +63,9 @@ const isLainLain = computed(() => {
 })
 
 function submit() {
-
     form.post('/admin/data-pemindahans', {
-        forceFormData: true
+        forceFormData: true, // Mengunci data sebagai berkas objek asli
+        preserveScroll: true
     })
 }
 </script>
@@ -342,7 +342,7 @@ function submit() {
                             />
                         </div>
 
-                        <!-- <div class="bg-emerald-50 p-4 rounded-lg border border-emerald-100">
+                        <div class="bg-emerald-50 p-4 rounded-lg border border-emerald-100">
                             <label class="text-sm font-bold text-emerald-700 block mb-2">
                                 Upload Laporan Pemindahan
                             </label>
@@ -353,7 +353,7 @@ function submit() {
                                 @change="form.laporan_pemindahan = $event.target.files[0]"
                                 class="text-sm w-full"
                             />
-                        </div> -->
+                        </div>
 
                         <div class="bg-orange-50 p-4 rounded-lg border border-orange-100">
                             <label class="text-sm font-bold text-orange-700 block mb-2">

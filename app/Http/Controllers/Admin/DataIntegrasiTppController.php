@@ -8,8 +8,6 @@ use App\Models\DataIntegrasiTpp;
 use Inertia\Inertia;
 use App\Models\Upt;
 use Illuminate\Support\Facades\Storage;
-use Intervention\Image\ImageManager;
-use Intervention\Image\Drivers\Gd\Driver;
 
 class DataIntegrasiTppController extends Controller
 {
@@ -54,37 +52,43 @@ class DataIntegrasiTppController extends Controller
 
     public function store(Request $request)
     {
-    $validated = $request->validate([
-    'upt_id' => 'required|exists:upts,id',
-    'tanggal_input' => 'required|date',
-    'tanggal_pelaksanaan' => 'required|date',
-    'jumlah_narapidana_sidang' => 'required|integer|min:0', // Pastikan ini ada
-    'nomor_sidang' => 'required|string|max:255',
-    'rekomendasi_sidang' => 'required|string',
-    'permasalahan' => 'required|string', // Pastikan nama kolomnya sama
-    'upaya' => 'required|string',
-    'berita_acara' => 'nullable|file|mimes:pdf|max:5120',
-    'absensi' => 'nullable|file|mimes:pdf|max:5120',
-    'dokumentasi_sidang' => 'nullable|array',
-    'dokumentasi_sidang.*' => 'image|mimes:jpg,jpeg,png|max:5120',
-    ]);
+        $validated = $request->validate([
+            'upt_id' => 'required|exists:upts,id',
+            'tanggal_input' => 'required|date',
+            'tanggal_pelaksanaan' => 'required|date',
+            'jumlah_narapidana_sidang' => 'required|integer|min:0',
+            'nomor_sidang' => 'required|string|max:255',
+            'rekomendasi_sidang' => 'required|string',
+            'permasalahan' => 'required|string',
+            'upaya' => 'required|string',
+            'berita_acara' => 'required|file|mimes:pdf|max:5120',
+            'absensi' => 'required|file|mimes:pdf|max:5120',
+            'dokumentasi_sidang' => 'required|array',
+            'dokumentasi_sidang.*' => 'image|mimes:jpg,jpeg,png|max:5120',
+        ]);
 
-    // Handle PDF
-    if ($request->hasFile('berita_acara')) $validated['berita_acara'] = $request->file('berita_acara')->store('tpp/berita_acara', 'public');
-    if ($request->hasFile('absensi')) $validated['absensi'] = $request->file('absensi')->store('tpp/absensi', 'public');
+        // Handle PDF langsung ke Google Drive
+        if ($request->hasFile('berita_acara')) {
+            $validated['berita_acara'] = $request->file('berita_acara')->store('tpp/berita_acara', 'google');
+        }
+        if ($request->hasFile('absensi')) {
+            $validated['absensi'] = $request->file('absensi')->store('tpp/absensi', 'google');
+        }
 
-    // Handle Multiple Images
-    $images = [];
-    foreach ($request->file('dokumentasi_sidang') as $file) {
-        $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-        $file->storeAs('tpp/dokumentasi', $filename, 'public');
-        $images[] = 'tpp/dokumentasi/' . $filename;
+        // Handle Multiple Images langsung ke Google Drive tanpa kompresi
+        $images = [];
+        if ($request->hasFile('dokumentasi_sidang')) {
+            foreach ($request->file('dokumentasi_sidang') as $file) {
+                $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $path = $file->storeAs('tpp/dokumentasi', $filename, 'google');
+                $images[] = $path;
+            }
+        }
+        $validated['dokumentasi_sidang'] = $images;
+
+        DataIntegrasiTpp::create($validated);
+        return redirect()->route('data-integrasi-tpps.index')->with('success', 'Data Sidang TPP berhasil disimpan ke Google Drive.');
     }
-    $validated['dokumentasi_sidang'] = $images;
-
-    DataIntegrasiTpp::create($validated);
-    return redirect()->route('data-integrasi-tpps.index')->with('success', 'Data Sidang TPP berhasil ditambahkan.');
-}
 
     public function edit($id)
     {
@@ -107,71 +111,90 @@ class DataIntegrasiTppController extends Controller
     {
         $dataintegrasitpp = DataIntegrasiTpp::findOrFail($id);
 
-    $validated = $request->validate([
-        'upt_id' => 'required|exists:upts,id',
-        'tanggal_input' => 'required|date',
-        'tanggal_pelaksanaan' => 'required|date',
-        'jumlah_narapidana_sidang' => 'required|integer|min:0', // Field baru
-        'nomor_sidang' => 'required|string|max:255',
-        'rekomendasi_sidang' => 'required|string',
-        'permasalahan' => 'required|string', // Ganti kendala
-        'upaya' => 'required|string',
-        'berita_acara' => 'nullable|file|mimes:pdf|max:5120',
-        'absensi' => 'nullable|file|mimes:pdf|max:5120',
-        'dokumentasi_sidang' => 'nullable|array', // Jadi nullable
-        'dokumentasi_sidang.*' => 'image|mimes:jpg,jpeg,png|max:5120',
-    ]);
+        $validated = $request->validate([
+            'upt_id' => 'required|exists:upts,id',
+            'tanggal_input' => 'required|date',
+            'tanggal_pelaksanaan' => 'required|date',
+            'jumlah_narapidana_sidang' => 'required|integer|min:0',
+            'nomor_sidang' => 'required|string|max:255',
+            'rekomendasi_sidang' => 'required|string',
+            'permasalahan' => 'required|string',
+            'upaya' => 'required|string',
+            'berita_acara' => 'nullable|file|mimes:pdf|max:5120',
+            'absensi' => 'nullable|file|mimes:pdf|max:5120',
+            'dokumentasi_sidang' => 'nullable|array',
+            'dokumentasi_sidang.*' => 'image|mimes:jpg,jpeg,png|max:5120',
+        ]);
 
-        // 1. PENTING: Hapus field file dari $validated agar tidak menimpa DB jadi null
         unset($validated['berita_acara']);
         unset($validated['absensi']);
         unset($validated['dokumentasi_sidang']);
 
-        // 2. Proses Update PDF Berita Acara (JIKA ADA FILE BARU)
+        // Update PDF Berita Acara di Google Drive
         if ($request->hasFile('berita_acara')) {
-            if ($dataintegrasitpp->berita_acara) Storage::disk('public')->delete($dataintegrasitpp->berita_acara);
-            $validated['berita_acara'] = $request->file('berita_acara')->store('tpp/berita_acara', 'public');
+            if ($dataintegrasitpp->berita_acara && Storage::disk('google')->exists($dataintegrasitpp->berita_acara)) {
+                Storage::disk('google')->delete($dataintegrasitpp->berita_acara);
+            }
+            $validated['berita_acara'] = $request->file('berita_acara')->store('tpp/berita_acara', 'google');
         }
 
-        // 3. Proses Update PDF Absensi (JIKA ADA FILE BARU)
+        // Update PDF Absensi di Google Drive
         if ($request->hasFile('absensi')) {
-            if ($dataintegrasitpp->absensi) Storage::disk('public')->delete($dataintegrasitpp->absensi);
-            $validated['absensi'] = $request->file('absensi')->store('tpp/absensi', 'public');
+            if ($dataintegrasitpp->absensi && Storage::disk('google')->exists($dataintegrasitpp->absensi)) {
+                Storage::disk('google')->delete($dataintegrasitpp->absensi);
+            }
+            $validated['absensi'] = $request->file('absensi')->store('tpp/absensi', 'google');
         }
 
-        // 4. Proses Update Foto Dokumentasi (JIKA ADA FILE BARU)
+        // Update Multiple Foto di Google Drive
         if ($request->hasFile('dokumentasi_sidang')) {
-            if ($dataintegrasitpp->dokumentasi_sidang) Storage::disk('public')->delete($dataintegrasitpp->dokumentasi_sidang);
+            // Hapus yang lama dulu
+            if (!empty($dataintegrasitpp->dokumentasi_sidang)) {
+                foreach ($dataintegrasitpp->dokumentasi_sidang as $oldFile) {
+                    if (Storage::disk('google')->exists($oldFile)) {
+                        Storage::disk('google')->delete($oldFile);
+                    }
+                }
+            }
             
-            $file = $request->file('dokumentasi_sidang');
-            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $folderPath = storage_path('app/public/tpp/dokumentasi');
-            if (!file_exists($folderPath)) mkdir($folderPath, 0755, true);
-            $path = $folderPath . '/' . $filename;
-            
-            $manager = ImageManager::usingDriver(Driver::class);
-            $image = $manager->decodePath($file->getPathname());
-            $image->scale(width: 1200);
-            $image->save($path, 75);
-            
-            $validated['dokumentasi_sidang'] = 'tpp/dokumentasi/' . $filename;
+            // Simpan yang baru
+            $images = [];
+            foreach ($request->file('dokumentasi_sidang') as $file) {
+                $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $path = $file->storeAs('tpp/dokumentasi', $filename, 'google');
+                $images[] = $path;
+            }
+            $validated['dokumentasi_sidang'] = $images;
         }
 
         $dataintegrasitpp->update($validated);
 
-        return redirect()->route('data-integrasi-tpps.index')->with('success', 'Data Sidang TPP berhasil diperbarui.');
+        return redirect()->route('data-integrasi-tpps.index')->with('success', 'Data Sidang TPP berhasil diperbarui di Google Drive.');
     }
 
     public function destroy($id)
     {
         $dataintegrasitpp = DataIntegrasiTpp::findOrFail($id);
         
-        if ($dataintegrasitpp->berita_acara) Storage::disk('public')->delete($dataintegrasitpp->berita_acara);
-        if ($dataintegrasitpp->absensi) Storage::disk('public')->delete($dataintegrasitpp->absensi);
-        if ($dataintegrasitpp->dokumentasi_sidang) Storage::disk('public')->delete($dataintegrasitpp->dokumentasi_sidang);
+        // Hapus PDF dari Drive
+        if ($dataintegrasitpp->berita_acara && Storage::disk('google')->exists($dataintegrasitpp->berita_acara)) {
+            Storage::disk('google')->delete($dataintegrasitpp->berita_acara);
+        }
+        if ($dataintegrasitpp->absensi && Storage::disk('google')->exists($dataintegrasitpp->absensi)) {
+            Storage::disk('google')->delete($dataintegrasitpp->absensi);
+        }
+        
+        // Hapus Foto dari Drive
+        if (!empty($dataintegrasitpp->dokumentasi_sidang)) {
+            foreach ($dataintegrasitpp->dokumentasi_sidang as $file) {
+                if (Storage::disk('google')->exists($file)) {
+                    Storage::disk('google')->delete($file);
+                }
+            }
+        }
 
         $dataintegrasitpp->delete();
         
-        return redirect()->route('data-integrasi-tpps.index')->with('success', 'Data Sidang TPP berhasil dihapus.');
+        return redirect()->route('data-integrasi-tpps.index')->with('success', 'Data Sidang TPP dan file di Drive berhasil dihapus.');
     }
 }

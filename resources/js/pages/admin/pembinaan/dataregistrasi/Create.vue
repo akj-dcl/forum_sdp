@@ -44,13 +44,11 @@ const idTotalResidivis = computed(() => props.umums?.find(i => i.nama_registrasi
 const idPidsusResidivis = computed(() => props.pidsuses?.find(i => i.nama_registrasipidsus.toLowerCase().includes('residivis'))?.id);
 const idPidumResidivis = computed(() => props.pidums?.find(i => i.nama_registrasipidum.toLowerCase().includes('residivis'))?.id);
 
-// 🛠️ PENDETEKSI ID IDENTITAS UNTUK KALKULASI NIK DAN KTP TERPISAH
 const idAdaNik = computed(() => props.identitases?.find(i => i.nama_registrasiidentitas.toLowerCase().includes('ada nik') && !i.nama_registrasiidentitas.toLowerCase().includes('tidak'))?.id);
 const idTidakAdaNik = computed(() => props.identitases?.find(i => i.nama_registrasiidentitas.toLowerCase().includes('tidak ada nik'))?.id);
 const idAdaKtp = computed(() => props.identitases?.find(i => i.nama_registrasiidentitas.toLowerCase().includes('ada ktp') && !i.nama_registrasiidentitas.toLowerCase().includes('tidak'))?.id);
 const idTidakAdaKtp = computed(() => props.identitases?.find(i => i.nama_registrasiidentitas.toLowerCase().includes('tidak ada ktp'))?.id);
 
-// 🛠️ RUMUS TOTAL (Pengecualian Residivis)
 const totalIsiVal = computed(() => Number(form.rekap_umum[idTotalIsi.value]) || 0);
 
 const totalPendidikan = computed(() => Object.values(form.rekap_pendidikan).reduce((a, b) => Number(a) + Number(b), 0));
@@ -110,6 +108,20 @@ function hitungTotalan() {
     let resiPidum = 0;
     if (idPidumResidivis.value) resiPidum = Number(form.rekap_pidum[idPidumResidivis.value]) || 0;
     if (idTotalResidivis.value) form.rekap_umum[idTotalResidivis.value] = resiNarkoba + resiPidum;
+
+    // 🛠️ GENERATOR WNA PINDAH KE SINI AGAR KEBAL ERROR DI VPS
+    if (idWna.value) {
+        const countWna = Number(form.rekap_umum[idWna.value]) || 0;
+        if (!form.rekap_umum['detail_wna']) form.rekap_umum['detail_wna'] = [];
+        
+        if (form.rekap_umum['detail_wna'].length < countWna) {
+            while (form.rekap_umum['detail_wna'].length < countWna) {
+                form.rekap_umum['detail_wna'].push({ status: 'Tahanan', negara: '' });
+            }
+        } else if (form.rekap_umum['detail_wna'].length > countWna) {
+            form.rekap_umum['detail_wna'].splice(countWna);
+        }
+    }
 }
 
 function cekKeteranganOverstaying(id: number) {
@@ -119,14 +131,6 @@ function cekKeteranganOverstaying(id: number) {
         if (form.rekap_overstaying[id].keterangan === 'Nihil') form.rekap_overstaying[id].keterangan = '';
     }
 }
-
-watch(() => idWna.value ? form.rekap_umum[idWna.value] : null, (newVal) => {
-    const count = Number(newVal) || 0;
-    if (!form.rekap_umum['detail_wna']) form.rekap_umum['detail_wna'] = [];
-    if (form.rekap_umum['detail_wna'].length < count) {
-        while (form.rekap_umum['detail_wna'].length < count) { form.rekap_umum['detail_wna'].push({ status: 'Tahanan', negara: '' }); }
-    } else if (form.rekap_umum['detail_wna'].length > count) { form.rekap_umum['detail_wna'].splice(count); }
-});
 
 function submit() { form.post('/admin/data-registrasis') }
 </script>
@@ -181,6 +185,17 @@ function submit() { form.post('/admin/data-registrasis') }
                         <input v-else v-model.number="form.rekap_umum[item.id]" @input="hitungTotalan" type="number" min="0" class="w-24 h-7 rounded border px-2 text-xs text-right bg-background focus:ring-primary" />
                     </div>
                 </div>
+
+                <div v-if="idWna && form.rekap_umum[idWna] > 0" class="mt-4 p-3 bg-blue-50/50 border border-blue-100 rounded-lg space-y-3 animate-fadeIn">
+                    <p class="text-xs font-bold text-blue-800">🌐 Detail Kebangsaan WNA ({{ form.rekap_umum[idWna] }} Orang):</p>
+                    <div v-for="(wna, index) in form.rekap_umum['detail_wna']" :key="index" class="p-2 border bg-white rounded shadow-sm space-y-2">
+                        <div class="flex items-center justify-between gap-1">
+                            <span class="text-[10px] font-bold text-muted-foreground">WNA #{{ index + 1 }}</span>
+                            <select v-model="wna.status" class="text-[10px] h-6 border rounded px-1"><option value="Tahanan">Tahanan</option><option value="Napi">Narapidana</option></select>
+                        </div>
+                        <input v-model="wna.negara" type="text" placeholder="Asal Negara" required class="w-full h-7 text-xs border rounded px-2" />
+                    </div>
+                </div>
             </div>
 
             <div class="rounded-xl border bg-card p-4 shadow-sm flex flex-col justify-between">
@@ -190,8 +205,7 @@ function submit() { form.post('/admin/data-registrasis') }
                 </div>
                 <div :class="totalPendidikan === totalIsiVal ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-red-50 border-red-200 text-red-700'" class="mt-3 p-2 rounded-lg border text-[10px] font-bold flex justify-between items-center transition-colors">
                     <span>Total: {{ totalPendidikan }}</span>
-                    <span v-if="totalPendidikan !== totalIsiVal">⚠️ Selisih: {{ Math.abs(totalPendidikan - totalIsiVal) }}</span>
-                    <span v-else>✅ Sesuai Total Isi</span>
+                    <span v-if="totalPendidikan !== totalIsiVal">⚠️ Selisih: {{ Math.abs(totalPendidikan - totalIsiVal) }}</span><span v-else>✅ Sesuai Total Isi</span>
                 </div>
             </div>
 

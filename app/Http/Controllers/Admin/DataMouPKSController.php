@@ -53,7 +53,7 @@ class DataMouPksController extends Controller
             ->withQueryString();
 
         $upts = Upt::where('is_active', true)->get();
-
+//  
         return Inertia::render('admin/tudanumum/datamoupks/Index', [
             'datamoupks' => $datamoupks,
             'upts' => $upts,

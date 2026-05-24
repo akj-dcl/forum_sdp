@@ -67,6 +67,7 @@ use App\Http\Controllers\Admin\DataMouPksController;
 use App\Http\Controllers\Admin\DataBookingRapatController;
 use App\Http\Controllers\FileStreamController;
 use App\Http\Controllers\Admin\DashboardPembinaanController;
+use App\Http\Controllers\Admin\DashboardTuController;
 
 
 
@@ -147,6 +148,7 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
     Route::resource('registrasi-detail-tahanans', RegistrasiDetailTahananController::class);
 
     Route::get('/pembinaan/dashboard', [DashboardPembinaanController::class, 'index'])->name('pembinaan.dashboard');
+    Route::get('/tudanumum/dashboard', [DashboardTuController::class, 'index'])->name('dashboard.tu');
 
 });
 

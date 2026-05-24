@@ -138,7 +138,9 @@ const baseUptNavItems: NavItem[] = [
         title: 'Pengamanan',
         icon: Shield,
         children: [
+            
             {
+                
                 title: 'Perawatan',
                 children: [
                     { title: 'Input Data Harian', href: '/admin/data-perawatan-harians' },
@@ -161,6 +163,7 @@ const baseUptNavItems: NavItem[] = [
         title: 'TU dan Umum',
         icon: BrickWall,
         children: [
+            { title: 'Dashboard TU dan Umum', href: '/admin/tudanumum/dashboard' },
             {
                 title: 'SDM',
                 children: [
@@ -233,6 +236,10 @@ const filteredUptNavItems = computed(() => {
     // 2. Jika Admin Pembinaan atau Operator Pembinaan -> Tampilkan Dashboard & Pembinaan Saja
     if (hasRole('Admin Pembinaan') || hasRole('Operator Pembinaan')) {
         return baseUptNavItems.filter(item => item.title === 'Pembinaan');
+    }
+
+    if (hasRole('Admin TU') || hasRole('Operator TU')) {
+        return baseUptNavItems.filter(item => item.title === 'TU dan Umum');
     }
 
     // Default jika tidak punya role di atas (kosongkan)

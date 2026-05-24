@@ -102,11 +102,11 @@ function getOvercrowdedPersen(d: any) {
               <div class="flex-1 md:w-auto">
                   <label class="text-[10px] uppercase font-bold text-primary block mb-1">Detail Modul</label>
                   <select v-model="modul" class="w-full border-0 rounded-lg px-3 py-2 text-sm bg-primary text-primary-foreground font-bold shadow-md cursor-pointer hover:bg-primary/90 transition-colors">
-                      <option value="ringkasan">📋 Ringkasan Total</option>
-                      <option value="registrasi">👥 Data Registrasi</option>
-                      <option value="residivis">🛑 Data Residivis</option>
-                      <option value="pemindahan">🚐 Data Pemindahan</option>
-                      <option value="integrasi">🤝 Data Integrasi</option>
+                      <option value="ringkasan">Ringkasan Total</option>
+                      <option value="registrasi">Data Registrasi</option>
+                      <option value="residivis">Data Residivis</option>
+                      <option value="pemindahan">Data Pemindahan</option>
+                      <option value="integrasi">Data Integrasi</option>
                   </select>
               </div>
           </div>
@@ -178,7 +178,7 @@ function getOvercrowdedPersen(d: any) {
               <div v-if="!data_dinamis.length" class="text-center py-8 text-muted-foreground italic bg-white rounded-xl border">Nihil data registrasi pada tanggal ini.</div>
 
               <div v-for="(d, index) in data_dinamis" :key="index" class="mb-8 last:mb-0">
-                  <div class="bg-slate-800 text-slate-100 px-4 py-2 rounded-t-xl font-bold flex items-center gap-2">🏢 {{ d.upt?.name || 'KUMULATIF KANWIL (Semua UPT)' }}</div>
+                  <div class="bg-slate-800 text-slate-100 px-4 py-2 rounded-t-xl font-bold flex items-center gap-2">{{ d.upt?.name || 'KUMULATIF KANWIL (Semua UPT)' }}</div>
                   
                   <div class="bg-card border border-t-0 rounded-b-xl p-5 shadow-sm space-y-6">
                       <div>

@@ -16,6 +16,7 @@ class DataMouPksController extends Controller
 
         $query = DataMouPks::with(['upt']);
 
+        // Proteksi Data UPT
         if ($user->upt_id) {
             $query->where(function ($q) use ($user) {
                 $q->where('upt_id', $user->upt_id)
@@ -23,6 +24,28 @@ class DataMouPksController extends Controller
             });
         } elseif ($request->upt_id) {
             $query->where('upt_id', $request->upt_id);
+        }
+
+        // 🛠️ FILTER 1: PENULISAN FIELD KETIK (PENCARIAN JUDUL / MITRA)
+        if ($request->search) {
+            $query->where(function ($q) use ($request) {
+                $q->where('judul_kerjasama', 'like', "%{$request->search}%")
+                  ->orWhere('instansi_kerjasama', 'like', "%{$request->search}%");
+            });
+        }
+
+        // 🛠️ FILTER 2: TINGKAT MOU / PEMRAKARSA
+        if ($request->kategori_pemrakarsa) {
+            $query->where('kategori_pemrakarsa', $request->kategori_pemrakarsa);
+        }
+
+        // 🛠️ FILTER 3: STATUS TAHANAN / PROSES
+        if ($request->status_tahapan) {
+            if ($request->status_tahapan === 'Selesai') {
+                $query->where('status_tahapan', 'like', '%Selesai%');
+            } else {
+                $query->where('status_tahapan', $request->status_tahapan);
+            }
         }
 
         $datamoupks = $query->latest()
@@ -34,7 +57,8 @@ class DataMouPksController extends Controller
         return Inertia::render('admin/tudanumum/datamoupks/Index', [
             'datamoupks' => $datamoupks,
             'upts' => $upts,
-            'filters' => $request->only(['upt_id']),
+            // 🛠️ Lempar balik filter ke view agar tidak hilang saat halaman berganti
+            'filters' => $request->only(['upt_id', 'search', 'kategori_pemrakarsa', 'status_tahapan']),
             'isUptUser' => $user->upt_id ? true : false,
         ]);
     }

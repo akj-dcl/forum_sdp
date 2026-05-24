@@ -289,21 +289,17 @@ function submitUpdateFinal() {
                 >
                   <option value="">-- Pilih Tahapan --</option>
 
-                  <option value="Revisi (Dari Kanwil)">
-                    Revisi (Dari Kanwil)
-                  </option>
+                  <template v-if="isUptUser">
+                      <option value="Perbaikan (Dari UPT)">Perbaikan (Dari UPT)</option>
+                      <option value="Draft Final (Menunggu TTD)">Draft Final (Menunggu TTD)</option>
+                  </template>
 
-                  <option value="Perbaikan (Dari UPT)">
-                    Perbaikan (Dari UPT)
-                  </option>
-
-                  <option value="Validasi (Oleh Kanwil)">
-                    Validasi (Oleh Kanwil)
-                  </option>
-
-                  <option value="Draft Final (Menunggu TTD)">
-                    Draft Final
-                  </option>
+                  <template v-else>
+                      <option value="Revisi (Dari Kanwil)">Revisi (Dari Kanwil)</option>
+                      <option value="Perbaikan (Dari UPT)">Perbaikan (Dari UPT)</option>
+                      <option value="Validasi (Oleh Kanwil)">Validasi (Oleh Kanwil)</option>
+                      <option value="Draft Final (Menunggu TTD)">Draft Final (Menunggu TTD)</option>
+                  </template>
                 </select>
               </div>
 

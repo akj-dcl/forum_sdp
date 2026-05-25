@@ -107,10 +107,11 @@ function destroyData(id: number) {
               <div class="grid grid-cols-2 gap-4">
                 <div><p class="text-xs text-muted-foreground">Tgl Input</p><p class="font-medium">{{ selectedData.tanggal_input }}</p></div>
                 <div><p class="text-xs text-muted-foreground">Tgl Pelaksanaan</p><p class="font-medium">{{ selectedData.tanggal_pelaksanaan }}</p></div>
-                <div><p class="text-xs text-muted-foreground">Jml Narapidana Mengikuti Sidang</p><p class="font-bold text-lg text-primary">{{ selectedData.jumlah_narapidana_sidang }} Orang</p></div></div>
+                <div class="col-span-2"><p class="text-xs text-muted-foreground">Jml Narapidana Mengikuti Sidang</p><p class="font-bold text-lg text-primary">{{ selectedData.jumlah_narapidana_sidang }} Orang</p></div>
+              </div>
               <div><p class="text-xs text-muted-foreground">Nomor Sidang</p><p class="font-bold text-primary">{{ selectedData.nomor_sidang }}</p></div>            
               <div class="bg-muted/50 p-3 rounded-lg space-y-3">
-                  <div><p class="text-xs text-muted-foreground">Rekomendasi Sidang</p><p>{{ selectedData.rekomendiasi_sidang }}</p></div>
+                  <div><p class="text-xs text-muted-foreground">Rekomendasi Sidang</p><p>{{ selectedData.rekomendasi_sidang }}</p></div>
                   <div><p class="text-xs text-muted-foreground border-t pt-2">Permasalahan</p><p class="text-red-600">{{ selectedData.permasalahan }}</p></div>
                   <div><p class="text-xs text-muted-foreground border-t pt-2">Upaya</p><p class="text-emerald-600">{{ selectedData.upaya }}</p></div>
               </div>
@@ -119,12 +120,12 @@ function destroyData(id: number) {
           <div class="space-y-4 border-l pl-6">
               <h3 class="font-bold text-primary">Lampiran Dokumen</h3>
               
-              <div class="bg-blue-50/50 dark:bg-blue-900/10 p-3 rounded-lg border border-blue-100">
+              <div class="bg-blue-50/50 p-3 rounded-lg border border-blue-100">
                   <p class="text-xs font-semibold mb-2">📄 Berita Acara Sidang (PDF)</p>
                   <a :href="`/view-file?path=${selectedData.berita_acara}`" target="_blank" class="text-blue-600 hover:underline text-xs">Download / Lihat PDF Berita Acara</a>
               </div>
 
-              <div class="bg-indigo-50/50 dark:bg-indigo-900/10 p-3 rounded-lg border border-indigo-100">
+              <div class="bg-indigo-50/50 p-3 rounded-lg border border-indigo-100">
                   <p class="text-xs font-semibold mb-2">📋 Absensi Peserta (PDF)</p>
                   <a :href="`/view-file?path=${selectedData.absensi}`" target="_blank" class="text-indigo-600 hover:underline text-xs">Download / Lihat PDF Absensi</a>
               </div>

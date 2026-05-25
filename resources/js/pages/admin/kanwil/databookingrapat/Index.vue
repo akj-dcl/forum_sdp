@@ -48,10 +48,10 @@ function destroyData(id: number) {
             'text-red-600': filterStatus === 'Ditolak'
         }">
           <option value="" class="text-foreground">Semua Status Booking</option>
-          <option value="Menunggu Persetujuan" class="text-yellow-600">⏳ Menunggu Persetujuan</option>
-          <option value="Disetujui" class="text-emerald-600">✅ Disetujui (Akan Datang)</option>
-          <option value="Selesai" class="text-slate-600">🏁 Selesai</option>
-          <option value="Ditolak" class="text-red-600">❌ Ditolak</option>
+          <option value="Menunggu Persetujuan" class="text-yellow-600">Menunggu Persetujuan</option>
+          <option value="Disetujui" class="text-emerald-600">Disetujui (Akan Datang)</option>
+          <option value="Selesai" class="text-slate-600">Selesai</option>
+          <option value="Ditolak" class="text-red-600">Ditolak</option>
         </select>
       </div>
 
@@ -82,10 +82,10 @@ function destroyData(id: number) {
                         {{ d.ruangan.split('(')[0] }} </div>
                 </td>
                 <td class="p-6 text-center">
-                    <span v-if="d.status === 'Menunggu Persetujuan'" class="bg-yellow-100 text-yellow-800 border border-yellow-200 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider shadow-sm">⏳ Menunggu</span>
-                    <span v-if="d.status === 'Disetujui'" class="bg-emerald-100 text-emerald-800 border border-emerald-200 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider shadow-sm">✅ Disetujui</span>
-                    <span v-if="d.status === 'Selesai'" class="bg-slate-100 text-slate-800 border border-slate-200 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider shadow-sm">🏁 Selesai</span>
-                    <span v-if="d.status === 'Ditolak'" class="bg-red-100 text-red-800 border border-red-200 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider shadow-sm">❌ Ditolak</span>
+                    <span v-if="d.status === 'Menunggu Persetujuan'" class="bg-yellow-100 text-yellow-800 border border-yellow-200 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider shadow-sm">Menunggu</span>
+                    <span v-if="d.status === 'Disetujui'" class="bg-emerald-100 text-emerald-800 border border-emerald-200 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider shadow-sm">Disetujui</span>
+                    <span v-if="d.status === 'Selesai'" class="bg-slate-100 text-slate-800 border border-slate-200 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider shadow-sm">Selesai</span>
+                    <span v-if="d.status === 'Ditolak'" class="bg-red-100 text-red-800 border border-red-200 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider shadow-sm">Ditolak</span>
                 </td>
                 <td class="p-6 text-right">
                   <div class="flex justify-end gap-2">
@@ -113,10 +113,10 @@ function destroyData(id: number) {
             <div class="flex justify-between items-start mb-6">
                 <div>
                     <span class="text-[10px] font-black tracking-widest uppercase text-muted-foreground mb-1 block">Status Reservasi</span>
-                    <span v-if="selectedData?.status === 'Menunggu Persetujuan'" class="text-yellow-600 font-black text-xl">⏳ MENUNGGU PERSETUJUAN</span>
-                    <span v-if="selectedData?.status === 'Disetujui'" class="text-emerald-600 font-black text-xl">✅ RESERVASI DISETUJUI</span>
-                    <span v-if="selectedData?.status === 'Ditolak'" class="text-red-600 font-black text-xl">❌ RESERVASI DITOLAK</span>
-                    <span v-if="selectedData?.status === 'Selesai'" class="text-slate-600 font-black text-xl">🏁 RAPAT SELESAI</span>
+                    <span v-if="selectedData?.status === 'Menunggu Persetujuan'" class="text-yellow-600 font-black text-xl">MENUNGGU PERSETUJUAN</span>
+                    <span v-if="selectedData?.status === 'Disetujui'" class="text-emerald-600 font-black text-xl">RESERVASI DISETUJUI</span>
+                    <span v-if="selectedData?.status === 'Ditolak'" class="text-red-600 font-black text-xl">RESERVASI DITOLAK</span>
+                    <span v-if="selectedData?.status === 'Selesai'" class="text-slate-600 font-black text-xl">RAPAT SELESAI</span>
                 </div>
                 <button @click="closeModal" class="h-8 w-8 rounded-full bg-slate-200 text-slate-500 hover:bg-red-100 hover:text-red-600 flex items-center justify-center font-bold transition-colors">&times;</button>
             </div>

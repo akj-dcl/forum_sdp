@@ -65,7 +65,7 @@ class DataResidivisController extends Controller
         ]);
 
         if ($request->hasFile('putusan_pengadilan')) {
-            // 🛠️ UPLOAD KE GOOGLE DRIVE
+            // 🛠️ UBAH KE GOOGLE DRIVE
             $validated['putusan_pengadilan'] = $request->file('putusan_pengadilan')->store('residivis/putusan', 'google');
         }
 

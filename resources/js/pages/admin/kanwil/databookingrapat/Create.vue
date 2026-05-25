@@ -16,7 +16,7 @@ const form = useForm({
 })
 
 const daftarFasilitas = ['Proyektor / Layar Tambahan', 'Perangkat Zoom Meeting', 'Sound System / Mic', 'Whiteboard / Flipchart', 'Snack / Konsumsi', 'Air Mineral'];
-const daftarRuangan = ['Ruang Rapat Utama Kanwil (Kapasitas 50)', 'Ruang Rapat Kadivpas (Kapasitas 20)', 'Aula Kanwil (Kapasitas 150)', 'Ruang Media Center (Kapasitas 15)'];
+const daftarRuangan = ['Ruang Rapat Utama Kanwil (Kapasitas 50)', 'Aula Kanwil (Kapasitas 150)'];
 
 function toggleFasilitas(item: string) {
     const index = form.fasilitas.indexOf(item);

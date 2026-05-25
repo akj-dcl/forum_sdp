@@ -52,6 +52,8 @@ class DataIntegrasiTppController extends Controller
 
     public function store(Request $request)
     {
+        set_time_limit(300); // 🛠️ TAMBAHAN: Mencegah server RTO saat upload banyak foto
+
         $validated = $request->validate([
             'upt_id' => 'required|exists:upts,id',
             'tanggal_input' => 'required|date',
@@ -67,7 +69,6 @@ class DataIntegrasiTppController extends Controller
             'dokumentasi_sidang.*' => 'image|mimes:jpg,jpeg,png|max:5120',
         ]);
 
-        // Handle PDF langsung ke Google Drive
         if ($request->hasFile('berita_acara')) {
             $validated['berita_acara'] = $request->file('berita_acara')->store('tpp/berita_acara', 'google');
         }
@@ -75,7 +76,6 @@ class DataIntegrasiTppController extends Controller
             $validated['absensi'] = $request->file('absensi')->store('tpp/absensi', 'google');
         }
 
-        // Handle Multiple Images langsung ke Google Drive tanpa kompresi
         $images = [];
         if ($request->hasFile('dokumentasi_sidang')) {
             foreach ($request->file('dokumentasi_sidang') as $file) {
@@ -109,6 +109,8 @@ class DataIntegrasiTppController extends Controller
 
     public function update(Request $request, $id)
     {
+        set_time_limit(300); // 🛠️ TAMBAHAN: Mencegah server RTO saat upload banyak foto
+
         $dataintegrasitpp = DataIntegrasiTpp::findOrFail($id);
 
         $validated = $request->validate([
@@ -130,7 +132,6 @@ class DataIntegrasiTppController extends Controller
         unset($validated['absensi']);
         unset($validated['dokumentasi_sidang']);
 
-        // Update PDF Berita Acara di Google Drive
         if ($request->hasFile('berita_acara')) {
             if ($dataintegrasitpp->berita_acara && Storage::disk('google')->exists($dataintegrasitpp->berita_acara)) {
                 Storage::disk('google')->delete($dataintegrasitpp->berita_acara);
@@ -138,7 +139,6 @@ class DataIntegrasiTppController extends Controller
             $validated['berita_acara'] = $request->file('berita_acara')->store('tpp/berita_acara', 'google');
         }
 
-        // Update PDF Absensi di Google Drive
         if ($request->hasFile('absensi')) {
             if ($dataintegrasitpp->absensi && Storage::disk('google')->exists($dataintegrasitpp->absensi)) {
                 Storage::disk('google')->delete($dataintegrasitpp->absensi);
@@ -146,9 +146,7 @@ class DataIntegrasiTppController extends Controller
             $validated['absensi'] = $request->file('absensi')->store('tpp/absensi', 'google');
         }
 
-        // Update Multiple Foto di Google Drive
         if ($request->hasFile('dokumentasi_sidang')) {
-            // Hapus yang lama dulu
             if (!empty($dataintegrasitpp->dokumentasi_sidang)) {
                 foreach ($dataintegrasitpp->dokumentasi_sidang as $oldFile) {
                     if (Storage::disk('google')->exists($oldFile)) {
@@ -157,7 +155,6 @@ class DataIntegrasiTppController extends Controller
                 }
             }
             
-            // Simpan yang baru
             $images = [];
             foreach ($request->file('dokumentasi_sidang') as $file) {
                 $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
@@ -176,7 +173,6 @@ class DataIntegrasiTppController extends Controller
     {
         $dataintegrasitpp = DataIntegrasiTpp::findOrFail($id);
         
-        // Hapus PDF dari Drive
         if ($dataintegrasitpp->berita_acara && Storage::disk('google')->exists($dataintegrasitpp->berita_acara)) {
             Storage::disk('google')->delete($dataintegrasitpp->berita_acara);
         }
@@ -184,7 +180,6 @@ class DataIntegrasiTppController extends Controller
             Storage::disk('google')->delete($dataintegrasitpp->absensi);
         }
         
-        // Hapus Foto dari Drive
         if (!empty($dataintegrasitpp->dokumentasi_sidang)) {
             foreach ($dataintegrasitpp->dokumentasi_sidang as $file) {
                 if (Storage::disk('google')->exists($file)) {

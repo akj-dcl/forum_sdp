@@ -41,11 +41,13 @@ class HandleInertiaRequests extends Middleware
                     'id' => $request->user()->id,
                     'name' => $request->user()->name,
                     'email' => $request->user()->email,
-                
+                    'avatar' => $request->user()->avatar_url,
+                    'banner' => $request->user()->banner_url,
                     'role' => $request->user()->getRoleNames(), 
                     'permissions' => $request->user()->getAllPermissions()->pluck('name'),
                 ] : null,
             ],
+            'channels' => \App\Models\Channel::orderBy('name')->get(),
         ]);
     }
 }

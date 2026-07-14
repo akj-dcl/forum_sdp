@@ -7,25 +7,19 @@ use Illuminate\Support\Facades\Storage;
 use Google\Client as GoogleClient;
 use Google\Service\Drive as GoogleDriveService;
 use Masbug\Flysystem\GoogleDriveAdapter;
-use League\Flysystem\Filesystem; // INI YANG TADI TYPO, SEKARANG SUDAH BENAR
+use League\Flysystem\Filesystem;
 use Illuminate\Filesystem\FilesystemAdapter;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
+
     public function register(): void
     {
         //
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
-        // Sihir Penghubung PUSDAPAS ➔ Google Drive
         Storage::extend('google', function ($app, $config) {
             $client = new GoogleClient();
             $client->setClientId($config['clientId']);

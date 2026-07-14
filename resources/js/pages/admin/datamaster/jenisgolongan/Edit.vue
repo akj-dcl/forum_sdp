@@ -27,8 +27,8 @@ function submit() {
     <div class="flex h-full flex-1 flex-col gap-4 p-4 md:p-6 bg-background text-foreground">
       <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 class="text-2xl font-semibold tracking-tight">Edit Jenis Tindak Golongan</h1>
-          <p class="text-sm text-muted-foreground">Perbarui klasifikasi tindak golongan.</p>
+          <h1 class="text-2xl font-semibold tracking-tight">Edit Jenis Pangkat/Golongan</h1>
+          <p class="text-sm text-muted-foreground">Perbarui Klasifikasi Jenis Pangkat/Golongan.</p>
         </div>
 
         <Link

@@ -32,12 +32,10 @@ watch(
   debounce((newSearch: string) => {
     const params = new URLSearchParams();
     if (newSearch) params.append('search', newSearch);
-    
-    // Ganti window.location dengan router.get dari Inertia
     router.get(window.location.pathname, Object.fromEntries(params), {
       preserveState: true,
       preserveScroll: true,
-      replace: true // Supaya riwayat back button tidak dipenuhi hasil pencarian tiap huruf
+      replace: true
     });
   }, 300)
 )
@@ -55,8 +53,8 @@ function destroyGolongan(id: number) {
     <div class="flex h-full flex-1 flex-col gap-4 p-4 md:p-6 bg-background text-foreground">
       <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 class="text-2xl font-semibold tracking-tight">Master Jenis Golongan</h1>
-          <p class="text-sm text-muted-foreground">Kelola klasifikasi jenis tindak golongan Warga Binaan Pemasyarakatan.</p>
+          <h1 class="text-2xl font-semibold tracking-tight">Master Jenis Pangkat/Golongan</h1>
+          <p class="text-sm text-muted-foreground">Kelola Klasifikasi Jenis Pangkat/Golongan.</p>
         </div>
 
         <Link

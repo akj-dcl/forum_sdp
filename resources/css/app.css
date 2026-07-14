@@ -61,6 +61,83 @@
     --color-sidebar-ring: var(--sidebar-ring);
 }
 
+@theme {
+    /* Stitch Corporate Social & Admin Hub Design System */
+    --color-on-tertiary-container: #ffd0d2;
+    --color-primary: #3525cd;
+    --color-surface: #f9f9ff;
+    --color-primary-fixed-dim: #c3c0ff;
+    --color-on-error-container: #93000a;
+    --color-on-surface-variant: #464555;
+    --color-on-tertiary-fixed: #40000d;
+    --color-on-error: #ffffff;
+    --color-surface-container-low: #f0f3ff;
+    --color-primary-container: #4f46e5;
+    --color-on-primary: #ffffff;
+    --color-inverse-primary: #c3c0ff;
+    --color-primary-fixed: #e2dfff;
+    --color-error-container: #ffdad6;
+    --color-surface-dim: #cfdaf2;
+    --color-tertiary-fixed-dim: #ffb2b7;
+    --color-outline-variant: #c7c4d8;
+    --color-tertiary-container: #bf0f3c;
+    --color-inverse-on-surface: #ecf1ff;
+    --color-surface-container-lowest: #ffffff;
+    --color-on-primary-fixed-variant: #3323cc;
+    --color-background: #f9f9ff;
+    --color-surface-variant: #d8e3fb;
+    --color-secondary: #006591;
+    --color-surface-tint: #4d44e3;
+    --color-inverse-surface: #263143;
+    --color-on-secondary-container: #004666;
+    --color-on-background: #111c2d;
+    --color-outline: #777587;
+    --color-on-tertiary: #ffffff;
+    --color-secondary-container: #39b8fd;
+    --color-secondary-fixed: #c9e6ff;
+    --color-surface-container: #e7eeff;
+    --color-on-primary-fixed: #0f0069;
+    --color-tertiary-fixed: #ffdadb;
+    --color-surface-container-high: #dee8ff;
+    --color-error: #ba1a1a;
+    --color-secondary-fixed-dim: #89ceff;
+    --color-on-secondary-fixed-variant: #004c6e;
+    --color-on-primary-container: #dad7ff;
+    --color-on-tertiary-fixed-variant: #92002a;
+    --color-surface-bright: #f9f9ff;
+    --color-on-secondary: #ffffff;
+    --color-surface-container-highest: #d8e3fb;
+    --color-on-surface: #111c2d;
+    --color-tertiary: #95002b;
+    --color-on-secondary-fixed: #001e2f;
+
+    /* Custom Border Radius */
+    --radius-default: 0.25rem;
+    --radius-lg: 0.5rem;
+    --radius-xl: 0.75rem;
+    --radius-full: 9999px;
+
+    /* Spacing & Gutters */
+    --spacing-gutter: 1.5rem;
+    --spacing-stack-lg: 1.5rem;
+    --spacing-stack-md: 1rem;
+    --spacing-margin-desktop: 2rem;
+    --spacing-container-max: 1440px;
+    --spacing-margin-mobile: 1rem;
+    --spacing-stack-sm: 0.5rem;
+
+    /* Font Sizes */
+    --font-size-label-sm: 11px;
+    --font-size-headline-lg: 28px;
+    --font-size-body-lg: 16px;
+    --font-size-display: 36px;
+    --font-size-body-md: 14px;
+    --font-size-label-md: 12px;
+    --font-size-headline-lg-mobile: 24px;
+    --font-size-headline-md: 20px;
+}
+
+
 /*
   The default border color has changed to `currentColor` in Tailwind CSS v4,
   so we've added these compatibility styles to make sure everything still

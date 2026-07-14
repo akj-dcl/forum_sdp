@@ -1,0 +1,38 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Post extends Model
+{
+    protected $fillable = [
+        'user_id',
+        'channel_id',
+        'content',
+        'attachment_path',
+        'attachment_name',
+        'attachment_type',
+        'attachment_size'
+    ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function channel()
+    {
+        return $this->belongsTo(Channel::class);
+    }
+
+    public function comments()
+    {
+        return $this->hasMany(Comment::class)->latest();
+    }
+
+    public function reactions()
+    {
+        return $this->hasMany(PostReaction::class);
+    }
+}

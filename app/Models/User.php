@@ -22,12 +22,18 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
-        'username', // TAMBAHKAN INI
-        'nip',      // TAMBAHKAN INI
-        'jabatan',  // TAMBAHKAN INI
+        'username',
+        'nip',
+        'jabatan',
         'password',
         'upt_id',
+        'jenis_golongan_id',
+        'kanwil_id',
+        'avatar_path',
+        'banner_path',
     ];
+
+    protected $appends = ['avatar_url', 'banner_url'];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -52,11 +58,32 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'two_factor_confirmed_at' => 'datetime',
+            'last_seen_at' => 'datetime',
         ];
     }
 
     public function upt() 
     {
         return $this->belongsTo(Upt::class);
+    }
+
+    public function kanwil() 
+    {
+        return $this->belongsTo(Kanwil::class);
+    }
+
+    public function jenisGolongan() 
+    {
+        return $this->belongsTo(JenisGolongan::class);
+    }
+
+    public function getAvatarUrlAttribute()
+    {
+        return $this->avatar_path ? asset('storage/' . $this->avatar_path) : null;
+    }
+
+    public function getBannerUrlAttribute()
+    {
+        return $this->banner_path ? asset('storage/' . $this->banner_path) : null;
     }
 }

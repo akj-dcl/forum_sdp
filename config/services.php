@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'sdp' => [
+        'base_url' => env('SDP_BASE_URL'),
+        'token' => env('SDP_TOKEN'),
+    ],
+
 ];

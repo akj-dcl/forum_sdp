@@ -14,6 +14,8 @@ type User = {
   upt_id: number | null
   roles: { id: number; name: string }[]
   upt?: { id: number; name: string } // Tambahan relasi UPT
+  kanwil?: { id: number; name: string } // Tambahan relasi Kanwil
+  jenis_golongan?: { id: number; nama_golongan: string } // Tambahan relasi Golongan
 }
 
 type PaginationLink = { url: string | null; label: string; active: boolean }
@@ -96,17 +98,26 @@ const deleteUser = (id: number) => {
               <tr v-for="u in users.data" :key="u.id" class="border-b border-border transition-colors hover:bg-muted/50">
                 <td class="p-4">
                   <div class="font-bold text-primary">{{ u.name }}</div>
-                  <div class="font-medium mt-1 text-xs text-muted-foreground">{{ u.jabatan }}</div>
+                  <div class="font-medium mt-1 text-xs text-muted-foreground">
+                    {{ u.jabatan }}
+                    <span v-if="u.jenis_golongan" class="opacity-80"> • {{ u.jenis_golongan.nama_golongan }}</span>
+                  </div>
                 </td>
                 <td class="p-4 font-mono font-medium">{{ u.nip }}</td>
                 <td class="p-4">
-                  <span class="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 uppercase">
-                    {{ u.roles[0]?.name ?? '-' }}
-                  </span>
+                  <div class="flex flex-wrap gap-1 max-w-[250px]">
+                    <span v-for="r in u.roles" :key="r.id" class="inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 uppercase select-none">
+                      {{ r.name }}
+                    </span>
+                    <span v-if="!u.roles.length" class="text-muted-foreground">-</span>
+                  </div>
                 </td>
                 <td class="p-4">
                   <span v-if="u.upt" class="font-medium text-emerald-700">{{ u.upt.name }}</span>
-                  <span v-else class="inline-flex items-center rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">Kanwil / Pusat</span>
+                  <span v-else-if="u.kanwil" class="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
+                    Kanwil {{ u.kanwil.name }}
+                  </span>
+                  <span v-else class="inline-flex items-center rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">Pusat</span>
                 </td>
                 <td class="p-4 text-right align-middle">
                   <div class="flex justify-end gap-2">

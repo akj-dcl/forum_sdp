@@ -13,108 +13,133 @@ withDefaults(
 </script>
 
 <template>
-    <Head title="Selamat Datang - PUSDAPAS" />
+    <Head title="4C - Cozy Corner Correctional Club" />
 
-    <div class="relative flex min-h-screen flex-col items-center justify-center bg-slate-900 selection:bg-yellow-500 selection:text-slate-900">
+    <div class="relative flex min-h-screen flex-col items-center justify-between bg-slate-950 selection:bg-primary selection:text-on-primary overflow-hidden text-slate-100 font-sans" style="font-family: 'Inter', sans-serif;">
         
-        <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-            <div class="absolute -top-[30%] -left-[10%] w-[70%] h-[70%] rounded-full bg-blue-800/20 blur-3xl"></div>
-            <div class="absolute top-[20%] -right-[10%] w-[50%] h-[50%] rounded-full bg-yellow-600/10 blur-3xl"></div>
+        <!-- Glowing Ambient Background Effects -->
+        <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none">
+            <div class="absolute -top-[20%] -left-[10%] w-[60%] h-[60%] rounded-full bg-indigo-900/20 blur-3xl"></div>
+            <div class="absolute top-[40%] right-[-10%] w-[50%] h-[50%] rounded-full bg-violet-900/10 blur-3xl"></div>
+            <div class="absolute bottom-[-10%] left-[20%] w-[40%] h-[40%] rounded-full bg-blue-900/10 blur-3xl"></div>
         </div>
 
-        <div class="relative z-10 w-full max-w-7xl px-6 lg:px-8">
-            <header class="flex items-center justify-between py-6 w-full">
-                <div class="flex items-center">
-                    <span class="text-2xl font-bold text-white tracking-wider">
-                        PUS<span class="text-yellow-500">DAPAS</span>
-                    </span>
+        <!-- Glassmorphic Top Navbar -->
+        <header class="relative z-10 w-full max-w-7xl px-6 lg:px-8 flex items-center justify-between py-6 shrink-0">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-primary to-violet-600 flex items-center justify-center shadow-lg shadow-primary/20">
+                    <span class="material-symbols-outlined text-white font-bold" style="font-variation-settings: 'FILL' 1;">forum</span>
                 </div>
-
-                <nav class="flex items-center gap-4">
-                    <Link
-                        v-if="$page.props.auth.user"
-                        :href="dashboard()"
-                        class="px-6 py-2.5 text-sm font-semibold text-slate-900 transition-all duration-300 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-lg hover:from-yellow-300 hover:to-yellow-500 shadow-lg shadow-yellow-500/30"
-                    >
-                        Masuk Dashboard
-                    </Link>
-                    <template v-else>
-                        <Link
-                            :href="login()"
-                            class="px-5 py-2 text-sm font-medium text-slate-300 transition-colors hover:text-white"
-                        >
-                            Log in
-                        </Link>
-                    </template>
-                </nav>
-            </header>
-
-            <main class="mt-16 sm:mt-24 lg:mt-32 flex flex-col items-center text-center">
-                <div class="mb-8 inline-flex items-center rounded-full border border-yellow-500/30 bg-yellow-500/10 px-3 py-1 text-sm text-yellow-400">
-                    <span class="flex w-2 h-2 rounded-full bg-yellow-500 mr-2"></span>
-                    Sistem Informasi Manajemen Terpadu
-                </div>
-
-                <h1 class="text-4xl font-extrabold tracking-tight text-white sm:text-6xl lg:text-7xl max-w-4xl leading-tight">
-                    Pusat Data Pemasyarakatan <br/>
-                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-yellow-500 to-yellow-600">
-                        Nusa Tenggara Barat
-                    </span>
-                </h1>
-                
-                <p class="mt-6 text-lg leading-8 text-slate-300 max-w-2xl">
-                    Platform digital terintegrasi untuk pengelolaan data warga binaan, program pembinaan, dan administrasi pemasyarakatan secara efektif dan efisien.
-                </p>
-
-                <div class="mt-10 flex items-center justify-center gap-x-6">
-                    <Link
-                        v-if="!$page.props.auth.user"
-                        :href="login()"
-                        class="rounded-lg bg-gradient-to-r from-yellow-400 to-yellow-600 px-8 py-3.5 text-base font-semibold text-slate-900 shadow-lg shadow-yellow-500/30 hover:from-yellow-300 hover:to-yellow-500 transition-all duration-300"
-                    >
-                        Mulai Akses Sistem
-                    </Link>
-                    <a href="#features" class="text-sm font-semibold leading-6 text-slate-300 hover:text-white transition-colors">
-                        Pelajari Lebih Lanjut <span aria-hidden="true">→</span>
-                    </a>
-                </div>
-            </main>
-
-            <div class="mt-24 sm:mt-32 grid grid-cols-1 gap-8 sm:grid-cols-3 max-w-5xl mx-auto pb-16">
-                <div class="rounded-2xl border border-slate-700 bg-slate-800/50 p-6 backdrop-blur-sm">
-                    <div class="h-10 w-10 rounded-lg bg-blue-500/20 flex items-center justify-center mb-4">
-                        <svg class="h-6 w-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-semibold text-white">Manajemen Data Akurat</h3>
-                    <p class="mt-2 text-sm text-slate-400">Pencatatan data WBP yang terpusat dan terstruktur dengan baik.</p>
-                </div>
-                
-                <div class="rounded-2xl border border-slate-700 bg-slate-800/50 p-6 backdrop-blur-sm">
-                    <div class="h-10 w-10 rounded-lg bg-yellow-500/20 flex items-center justify-center mb-4">
-                        <svg class="h-6 w-6 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-semibold text-white">Monitoring Pembinaan</h3>
-                    <p class="mt-2 text-sm text-slate-400">Pantau perkembangan program pembinaan kepribadian dan kemandirian.</p>
-                </div>
-
-                <div class="rounded-2xl border border-slate-700 bg-slate-800/50 p-6 backdrop-blur-sm">
-                    <div class="h-10 w-10 rounded-lg bg-green-500/20 flex items-center justify-center mb-4">
-                        <svg class="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-semibold text-white">Sistem Keamanan Terpadu</h3>
-                    <p class="mt-2 text-sm text-slate-400">Hak akses yang diatur ketat berdasarkan peran dan wilayah kerja UPT.</p>
+                <div class="flex flex-col">
+                    <span class="text-xl font-extrabold text-white tracking-tight leading-none">4C</span>
+                    <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mt-0.5">Cozy Corner</span>
                 </div>
             </div>
-        </div>
 
-        <footer class="absolute bottom-4 text-sm text-slate-500 z-10 text-center w-full">
-            &copy; {{ new Date().getFullYear() }} Kanwil Ditjenpas NTB. Hak Cipta Dilindungi.
+            <nav class="flex items-center gap-4">
+                <Link
+                    v-if="$page.props.auth.user"
+                    :href="dashboard()"
+                    class="px-6 py-2.5 text-sm font-semibold text-white transition-all duration-300 bg-primary hover:bg-opacity-90 rounded-xl shadow-lg shadow-primary/20"
+                >
+                    Masuk Dashboard
+                </Link>
+                <template v-else>
+                    <Link
+                        :href="login()"
+                        class="px-5 py-2.5 text-sm font-semibold text-slate-300 hover:text-white transition-colors"
+                    >
+                        Log in
+                    </Link>
+                    <Link
+                        v-if="canRegister"
+                        :href="register()"
+                        class="px-6 py-2.5 text-sm font-semibold text-white transition-all duration-300 bg-primary hover:bg-opacity-90 rounded-xl shadow-lg shadow-primary/20"
+                    >
+                        Register
+                    </Link>
+                </template>
+            </nav>
+        </header>
+
+        <!-- Main Hero -->
+        <main class="relative z-10 w-full max-w-7xl px-6 lg:px-8 flex-1 flex flex-col items-center justify-center text-center py-12">
+            <div class="mb-6 inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-semibold text-primary tracking-wide select-none">
+                <span class="flex w-2 h-2 rounded-full bg-primary mr-2 animate-pulse"></span>
+                INTERNAL ANNOUNCEMENT & COLLABORATION HUBS
+            </div>
+
+            <h1 class="text-5xl font-extrabold tracking-tight text-white sm:text-7xl lg:text-8xl max-w-5xl leading-tight">
+                Cozy Corner <br/>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary via-indigo-400 to-violet-500">
+                    Correctional Club
+                </span>
+            </h1>
+            
+            <p class="mt-6 text-lg sm:text-xl leading-relaxed text-slate-300 max-w-3xl">
+                Platform komunikasi internal, penyebaran informasi cepat (broadcast), serta ruang diskusi terpusat untuk meningkatkan kolaborasi, keakraban, dan integrasi kinerja pegawai pemasyarakatan.
+            </p>
+
+            <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 select-none">
+                <Link
+                    v-if="!$page.props.auth.user"
+                    :href="login()"
+                    class="w-full sm:w-auto rounded-xl bg-primary px-8 py-4 text-base font-bold text-white shadow-lg shadow-primary/20 hover:shadow-primary/30 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300"
+                >
+                    Mulai Akses Kolaborasi
+                </Link>
+                <Link
+                    v-else
+                    :href="dashboard()"
+                    class="w-full sm:w-auto rounded-xl bg-primary px-8 py-4 text-base font-bold text-white shadow-lg shadow-primary/20 hover:shadow-primary/30 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300"
+                >
+                    Masuk Dashboard
+                </Link>
+                <a href="#features" class="w-full sm:w-auto text-sm font-bold leading-6 text-slate-300 hover:text-white transition-colors py-3.5 px-6 rounded-xl hover:bg-slate-900/50 border border-transparent hover:border-slate-800/80">
+                    Pelajari Fitur 4C <span aria-hidden="true">↓</span>
+                </a>
+            </div>
+
+            <!-- Features Grid -->
+            <div id="features" class="mt-28 w-full max-w-6xl grid grid-cols-1 gap-6 sm:grid-cols-3 text-left">
+                <!-- Feature 1 -->
+                <div class="rounded-2xl border border-slate-800/80 bg-slate-900/40 p-6 backdrop-blur-md shadow-sm hover:border-primary/30 hover:bg-slate-900/60 transition-all duration-300 flex flex-col gap-4 group">
+                    <div class="h-12 w-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center group-hover:scale-110 transition-transform shadow-inner shadow-primary/5">
+                        <span class="material-symbols-outlined text-[24px]">rss_feed</span>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-white mb-1.5 group-hover:text-primary transition-colors">Broadcast & Comments</h3>
+                        <p class="text-sm leading-relaxed text-slate-400">Bagikan pengumuman atau info kegiatan dinamis secara cepat, lengkap dengan lampiran file, foto, video, like, serta utas komentar diskusi terarah.</p>
+                    </div>
+                </div>
+                
+                <!-- Feature 2 -->
+                <div class="rounded-2xl border border-slate-800/80 bg-slate-900/40 p-6 backdrop-blur-md shadow-sm hover:border-primary/30 hover:bg-slate-900/60 transition-all duration-300 flex flex-col gap-4 group">
+                    <div class="h-12 w-12 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center group-hover:scale-110 transition-transform shadow-inner shadow-indigo-500/5">
+                        <span class="material-symbols-outlined text-[24px]">forum</span>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-white mb-1.5 group-hover:text-indigo-400 transition-colors">Direct Messages Instan</h3>
+                        <p class="text-sm leading-relaxed text-slate-400">Komunikasi personal aman dan instan dengan sesama rekan kerja melalui obrolan pesan langsung bergaya modern, lengkap dengan penanda bacaan.</p>
+                    </div>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="rounded-2xl border border-slate-800/80 bg-slate-900/40 p-6 backdrop-blur-md shadow-sm hover:border-primary/30 hover:bg-slate-900/60 transition-all duration-300 flex flex-col gap-4 group">
+                    <div class="h-12 w-12 rounded-xl bg-violet-500/10 text-violet-400 flex items-center justify-center group-hover:scale-110 transition-transform shadow-inner shadow-violet-500/5">
+                        <span class="material-symbols-outlined text-[24px]">supervised_user_circle</span>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-white mb-1.5 group-hover:text-violet-400 transition-colors">Direktori Kehadiran</h3>
+                        <p class="text-sm leading-relaxed text-slate-400">Daftar rekan kerja yang sedang online di UPT, Kantor Wilayah, maupun Kantor Pusat terdeteksi secara real-time untuk mempermudah koordinasi tugas.</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Premium Footer -->
+        <footer class="relative z-10 w-full text-center py-6 text-xs text-slate-500 border-t border-slate-900 shrink-0 select-none">
+            &copy; {{ new Date().getFullYear() }} Cozy Corner Correctional Club (4C). Hak Cipta Dilindungi.
         </footer>
     </div>
 </template>

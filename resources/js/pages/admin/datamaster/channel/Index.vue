@@ -43,7 +43,6 @@ watch(
   }, 300)
 )
 
-// Modal states
 const showModal = ref(false)
 const modalTitle = ref('')
 const isEditing = ref(false)
@@ -115,7 +114,6 @@ const destroyChannel = (id: number) => {
         </button>
       </div>
 
-      <!-- Success Alert -->
       <div
         v-if="page.props.flash?.success"
         class="rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-600 dark:text-emerald-400 select-none"
@@ -123,7 +121,6 @@ const destroyChannel = (id: number) => {
         {{ page.props.flash.success }}
       </div>
 
-      <!-- Search bar -->
       <div class="grid gap-3 md:grid-cols-4">
         <div class="relative col-span-1 md:col-span-2">
           <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[20px]">search</span>
@@ -136,7 +133,6 @@ const destroyChannel = (id: number) => {
         </div>
       </div>
 
-      <!-- Data Table -->
       <div class="rounded-xl border border-outline-variant bg-surface-container-lowest text-on-surface shadow-sm overflow-hidden">
         <div class="relative w-full overflow-auto">
           <table class="w-full caption-bottom text-sm border-collapse">
@@ -192,7 +188,6 @@ const destroyChannel = (id: number) => {
         </div>
       </div>
 
-      <!-- Pagination -->
       <div v-if="channelsData.links.length > 3" class="flex items-center justify-between mt-2 select-none">
         <div class="text-sm text-on-surface-variant">
           Menampilkan {{ channelsData.from ?? 0 }} sampai {{ channelsData.to ?? 0 }} dari {{ channelsData.total }} data
@@ -220,7 +215,6 @@ const destroyChannel = (id: number) => {
       </div>
     </div>
 
-    <!-- Modal Form (Create / Edit) -->
     <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 select-none">
       <div class="w-full max-w-md bg-surface-container-lowest border border-outline-variant rounded-xl shadow-xl overflow-hidden flex flex-col">
         <div class="bg-primary text-on-primary px-5 py-4 flex items-center justify-between">

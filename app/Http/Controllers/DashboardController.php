@@ -15,7 +15,6 @@ class DashboardController extends Controller
     {
         $channels = Channel::orderBy('name')->get();
 
-        // 1. Fetch filtered posts based on active channel query
         $channelSlug = $request->query('channel');
         $activeChannel = null;
         if ($channelSlug) {
@@ -37,11 +36,9 @@ class DashboardController extends Controller
             ->map(function ($post) {
                 $userId = auth()->id();
                 
-                // Group reactions by type and count them
                 $likesCount = $post->reactions->where('type', 'like')->count();
                 $bulbsCount = $post->reactions->where('type', 'bulb')->count();
-                
-                // Check if currently authenticated user reacted
+
                 $userLiked = $post->reactions->where('user_id', $userId)->where('type', 'like')->isNotEmpty();
                 $userBulbed = $post->reactions->where('user_id', $userId)->where('type', 'bulb')->isNotEmpty();
                 
@@ -82,7 +79,6 @@ class DashboardController extends Controller
                 ];
             });
 
-        // 2. Fetch active users (online within 5 min, idle within 15 min)
         $directoryUsers = User::with(['upt', 'kanwil'])
             ->whereNotNull('last_seen_at')
             ->where('last_seen_at', '>=', now()->subMinutes(15))
@@ -99,7 +95,6 @@ class DashboardController extends Controller
                 ];
             });
 
-        // 3. Fetch corporate highlights
         $highlights = CorporateHighlight::latest()->take(5)->get()->map(function ($h) {
             return [
                 'id' => $h->id,

@@ -31,7 +31,6 @@ const fetchContacts = async () => {
   try {
     const res = await axios.get('/api/direct-messages/contacts')
     contacts.value = res.data
-    // Update active contact status if currently selected
     if (activeContact.value) {
       const updated = res.data.find((c: any) => c.id === activeContact.value.id)
       if (updated) {
@@ -47,8 +46,6 @@ const selectContact = async (contact: any) => {
   activeContact.value = contact
   newMessage.value = ''
   await fetchHistory(contact.id)
-  
-  // Set polling interval for messages
   if (pollInterval) clearInterval(pollInterval)
   pollInterval = setInterval(() => {
     if (activeContact.value) {
@@ -56,7 +53,6 @@ const selectContact = async (contact: any) => {
     }
   }, 3000)
 
-  // Scroll to bottom
   setTimeout(scrollToBottom, 100)
 }
 
@@ -87,12 +83,11 @@ const sendMessage = async () => {
     if (res.data.success) {
       messages.value.push(res.data.message)
       setTimeout(scrollToBottom, 50)
-      // Refresh contact snippet
       fetchContacts()
     }
   } catch (err) {
     console.error('Error sending message', err)
-    newMessage.value = text // restore input
+    newMessage.value = text
   }
 }
 
@@ -114,7 +109,6 @@ const scrollToBottom = () => {
 
 onMounted(() => {
   fetchContacts()
-  // Poll contacts list every 10 seconds to keep presence/snippets fresh
   const contactsInterval = setInterval(fetchContacts, 10000)
   
   onBeforeUnmount(() => {
@@ -128,12 +122,9 @@ onMounted(() => {
   <Head title="Direct Messages" />
 
   <AppLayout :breadcrumbs="breadcrumbs">
-    <!-- Messenger Container Card -->
     <div class="flex-1 w-full bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm overflow-hidden flex h-[calc(100vh-200px)] min-h-[500px]">
       
-      <!-- Left Panel: Contacts List -->
       <div class="w-80 sm:w-96 border-r border-outline-variant flex flex-col bg-surface-container-lowest shrink-0">
-        <!-- Header & Search -->
         <div class="p-4 border-b border-outline-variant flex flex-col gap-3">
           <h2 class="text-xl font-bold text-on-surface select-none">Messages</h2>
           <div class="relative">
@@ -147,7 +138,6 @@ onMounted(() => {
           </div>
         </div>
 
-        <!-- Contacts list -->
         <div class="flex-1 overflow-y-auto p-2 divide-y divide-outline-variant/30">
           <div 
             v-for="contact in filteredContacts" 
@@ -188,10 +178,8 @@ onMounted(() => {
         </div>
       </div>
 
-      <!-- Right Panel: Chat History / Empty State -->
       <div class="flex-1 flex flex-col bg-surface-container-low overflow-hidden">
         
-        <!-- Empty State -->
         <div v-if="!activeContact" class="flex-1 flex flex-col items-center justify-center text-on-surface-variant p-6 select-none">
           <div class="w-16 h-16 rounded-full bg-surface-container-high flex items-center justify-center border border-outline-variant shadow-sm mb-4">
             <span class="material-symbols-outlined text-primary text-[32px]">forum</span>
@@ -200,9 +188,7 @@ onMounted(() => {
           <p class="text-sm max-w-sm text-center">Select a colleague from the list on the left to start a private conversation.</p>
         </div>
 
-        <!-- Chat Frame -->
         <div v-else class="flex-1 flex flex-col overflow-hidden">
-          <!-- Active Contact Header -->
           <div class="bg-surface-container-lowest border-b border-outline-variant p-4 flex items-center gap-3 shrink-0">
             <Link :href="`/profile/${activeContact.id}`" class="relative shrink-0 select-none hover:opacity-90 transition-opacity">
               <div class="w-10 h-10 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-bold text-sm shrink-0 border border-outline-variant overflow-hidden">
@@ -219,7 +205,6 @@ onMounted(() => {
             </div>
           </div>
 
-          <!-- Message History bubbles list -->
           <div ref="messagesContainer" class="flex-1 overflow-y-auto p-6 space-y-4 flex flex-col">
             <div 
               v-for="msg in messages" 
@@ -238,7 +223,6 @@ onMounted(() => {
             </div>
           </div>
 
-          <!-- Input Area -->
           <div class="p-4 bg-surface-container-lowest border-t border-outline-variant flex gap-3 items-center shrink-0">
             <input 
               v-model="newMessage" 

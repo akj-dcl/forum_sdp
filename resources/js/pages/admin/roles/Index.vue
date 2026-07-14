@@ -29,18 +29,16 @@ const props = defineProps<{
 const page = usePage()
 const search = ref(props.filters.search || '')
 
-// Watcher untuk fitur pencarian
 watch(
   search,
   debounce((newSearch: string) => {
     const params = new URLSearchParams();
     if (newSearch) params.append('search', newSearch);
     
-    // Ganti window.location dengan router.get dari Inertia
     router.get(window.location.pathname, Object.fromEntries(params), {
       preserveState: true,
       preserveScroll: true,
-      replace: true // Supaya riwayat back button tidak dipenuhi hasil pencarian tiap huruf
+      replace: true 
     });
   }, 300)
 )

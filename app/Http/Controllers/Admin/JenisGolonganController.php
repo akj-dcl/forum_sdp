@@ -17,7 +17,6 @@ class JenisGolonganController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        // Pastikan folder di Vue-nya nanti bernama "JenisGolongan"
         return Inertia::render('admin/datamaster/jenisgolongan/Index', [
             'golongans' => $golongans,
             'filters' => $request->only(['search'])
@@ -38,7 +37,7 @@ class JenisGolonganController extends Controller
         return redirect()->route('jenis-golongans.index')->with('success', 'Jenis Golongan berhasil ditambahkan.');
     }
 
-    public function edit(JenisGolongan $jenis_golongan) // Variabel otomatis dari Laravel
+    public function edit(JenisGolongan $jenis_golongan)
     {
         return Inertia::render('admin/datamaster/jenisgolongan/Edit', ['golongan' => $jenis_golongan]);
     }

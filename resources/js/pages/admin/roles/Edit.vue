@@ -19,11 +19,10 @@ const form = useForm({
   permissions: props.rolePermissions
 })
 
-// Fungsi untuk mengelompokkan permissions berdasarkan kata pertama (sebelum tanda titik)
 const groupedPermissions = computed(() => {
   const groups: Record<string, string[]> = {}
   props.permissions.forEach(permission => {
-    const [groupName] = permission.split('.') // Ambil kata pertama sbg nama grup
+    const [groupName] = permission.split('.')
     if (!groups[groupName]) {
       groups[groupName] = []
     }

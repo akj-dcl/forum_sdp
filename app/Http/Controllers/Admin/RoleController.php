@@ -13,8 +13,6 @@ class RoleController extends Controller
     public function index(Request $request)
     {
         $roles = collect();
-    
-        // Fitur untuk search & pagination
         $roles = Role::with('permissions')
             ->when($request->search, function ($query, $search) {
             $query->where('name', 'like', "%{$search}%");
@@ -30,7 +28,6 @@ class RoleController extends Controller
 
     public function create()
     {
-        // Mengambil semua permissions untuk ditampilkan sebagai checkbox
         $permissions = Permission::pluck('name')->toArray();
         return Inertia::render('admin/roles/Create', ['permissions' => $permissions]);
     }

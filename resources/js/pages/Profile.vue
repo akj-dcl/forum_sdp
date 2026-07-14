@@ -29,10 +29,8 @@ const breadcrumbs: BreadcrumbItem[] = [
   { title: props.profileUser.name, href: `/profile/${props.profileUser.id}` }
 ]
 
-// Tab State
 const activeTab = ref<'broadcasts' | 'comments'>('broadcasts')
 
-// Image upload forms
 const avatarForm = useForm({
   avatar: null as File | null
 })

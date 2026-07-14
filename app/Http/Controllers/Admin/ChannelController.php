@@ -31,7 +31,7 @@ class ChannelController extends Controller
         $request->validate([
             'name' => 'required|string|max:255|unique:channels,name',
             'description' => 'nullable|string',
-            'color' => 'required|string|max:7', // Hex color e.g. #3525cd
+            'color' => 'required|string|max:7', 
         ]);
 
         Channel::create([

@@ -23,7 +23,6 @@ const hasRole = (role: string) => {
     return userRoles.value === role;
 };
 
-// Breadcrumbs definition
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: props.activeChannel ? `Channel: ${props.activeChannel.name}` : 'Home Feed',
@@ -31,10 +30,8 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-// Search Query for colleagues
 const searchColleagueQuery = ref('');
 
-// Filter colleagues based on search query
 const filteredColleagues = computed(() => {
     return props.directoryUsers.filter(c => 
         c.name.toLowerCase().includes(searchColleagueQuery.value.toLowerCase()) ||
@@ -44,7 +41,6 @@ const filteredColleagues = computed(() => {
 
 import EmojiStickerPicker from '@/components/EmojiStickerPicker.vue';
 
-// Form state using Inertia useForm
 const form = useForm({
     content: '',
     channel_id: props.activeChannel?.id || '',
@@ -124,7 +120,6 @@ const removeSticker = () => {
     form.sticker_url = '';
 };
 
-// Post Emojis / Sticker functions
 const handleSelectPostEmoji = (emoji: string) => {
     form.content += emoji;
 };
@@ -150,7 +145,6 @@ const focusPostTextarea = () => {
     postTextarea.value?.focus();
 };
 
-// Handle window custom events from AppLayout global sidebar
 const handleFocusTextarea = () => {
     focusPostTextarea();
 };
@@ -161,29 +155,24 @@ const emojiPickerContainer = ref<HTMLElement | null>(null);
 const handleClickOutside = (event: MouseEvent) => {
     const target = event.target as HTMLElement;
     
-    // Check post creator attachment dropdown click outside
     if (attachmentContainer.value && !attachmentContainer.value.contains(target)) {
         showAttachmentDropdown.value = false;
     }
-    
-    // Check post creator emoji picker click outside
+
     if (emojiPickerContainer.value && !emojiPickerContainer.value.contains(target)) {
         showPostEmojiPicker.value = false;
     }
     
-    // Check edit post attachment click outside
     const isInsideEditAttachment = target.closest('.edit-attachment-container');
     if (!isInsideEditAttachment) {
         editForm.value.showAttachmentDropdown = false;
     }
     
-    // Check edit post emoji click outside
     const isInsideEditEmoji = target.closest('.edit-emoji-picker-container');
     if (!isInsideEditEmoji) {
         editForm.value.showPostEmojiPicker = false;
     }
     
-    // Check comment emoji pickers click outside
     const isInsideCommentPicker = target.closest('.comment-emoji-picker-container');
     if (!isInsideCommentPicker) {
         activeCommentEmojiPickerPostId.value = null;
@@ -194,7 +183,6 @@ onMounted(() => {
     window.addEventListener('focus-post-textarea', handleFocusTextarea);
     document.addEventListener('click', handleClickOutside);
     
-    // Check if query param redirect exists from other pages
     const params = new URLSearchParams(window.location.search);
     if (params.get('create') === 'true') {
         focusPostTextarea();
@@ -207,7 +195,6 @@ onBeforeUnmount(() => {
     document.removeEventListener('click', handleClickOutside);
 });
 
-// Helper to get initials for fallback avatars
 const getInitials = (name: string) => {
     if (!name) return 'U';
     return name
@@ -218,7 +205,6 @@ const getInitials = (name: string) => {
         .toUpperCase();
 };
 
-// Engagement handlers via Inertia request
 const toggleReaction = (postId: number, type: 'like' | 'bulb') => {
     router.post(`/posts/${postId}/react`, { type }, {
         preserveScroll: true
@@ -240,7 +226,6 @@ const handleCreatePost = () => {
     });
 };
 
-// Commenting state & handlers
 const commentInputs = ref<Record<number, string>>({});
 const activeCommentFormPostId = ref<Record<number, boolean>>({});
 
@@ -942,7 +927,6 @@ const deleteComment = (commentId: number) => {
                             </div>
                         </div>
 
-                        <!-- Comment Input Form -->
                         <div class="flex gap-3 mt-1 relative">
                             <div class="w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-bold text-xs shrink-0 border border-outline-variant overflow-hidden">
                                 <img v-if="user.avatar_url" :src="user.avatar_url" class="w-full h-full object-cover" />
@@ -951,7 +935,6 @@ const deleteComment = (commentId: number) => {
                             <div class="flex-1 flex gap-2 items-center relative">
                                 <input v-model="commentInputs[post.id]" @keyup.enter="handleAddComment(post.id)" type="text" class="flex-1 bg-surface-container-low border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary rounded-lg py-1.5 px-3 font-body-md text-body-md text-on-surface placeholder-outline focus:outline-none transition-all" placeholder="Write a comment..." />
                                 
-                                <!-- Comment Emoji Picker Trigger -->
                                 <div class="relative shrink-0 select-none comment-emoji-picker-container">
                                     <button @click="toggleCommentEmojiPicker(post.id)" type="button" class="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container-low rounded-full transition-colors flex items-center justify-center cursor-pointer border-none bg-transparent" title="Pilih Emoji/Stiker">
                                         <span class="material-symbols-outlined text-[20px]">sentiment_satisfied</span>
@@ -972,7 +955,6 @@ const deleteComment = (commentId: number) => {
                     </div>
                 </article>
 
-                <!-- Fallback when no posts -->
                 <div v-if="posts.length === 0" class="bg-surface-container-lowest border border-outline-variant rounded-xl p-8 text-center text-on-surface-variant shadow-sm">
                     <span class="material-symbols-outlined text-[48px] text-outline mb-2">rss_feed</span>
                     <p class="font-body-lg text-body-lg">No posts yet in this channel.</p>
@@ -980,9 +962,7 @@ const deleteComment = (commentId: number) => {
                 </div>
             </div>
 
-            <!-- Right Sidebar: Directory & Quick Stats -->
             <div class="hidden lg:flex col-span-4 flex-col gap-stack-lg">
-                <!-- Directory Widget -->
                 <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-5 shadow-sm">
                     <div class="flex items-center justify-between mb-4 select-none">
                         <h3 class="font-headline-md text-headline-md text-on-surface">List User Online</h3>
@@ -1011,7 +991,6 @@ const deleteComment = (commentId: number) => {
                     </div>
                 </div>
 
-                <!-- Trending Topics / Information Widget (Dynamic Corporate Highlights) -->
                 <div class="bg-surface-container-low border border-outline-variant rounded-xl p-5">
                     <h3 class="font-label-md text-label-md text-outline uppercase tracking-wider mb-4 select-none">Papan Pengumuman</h3>
                     <ul class="flex flex-col gap-3">

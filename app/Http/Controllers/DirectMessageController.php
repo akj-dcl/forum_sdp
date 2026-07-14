@@ -9,16 +9,10 @@ use Inertia\Inertia;
 
 class DirectMessageController extends Controller
 {
-    /**
-     * Render the dedicated Direct Messages view.
-     */
     public function index()
     {
         return Inertia::render('DirectMessages');
     }
-    /**
-     * Get list of contacts for messaging.
-     */
     public function getContacts()
     {
         $currentUserId = auth()->id();
@@ -27,7 +21,6 @@ class DirectMessageController extends Controller
             ->where('id', '!=', $currentUserId)
             ->get()
             ->map(function ($user) use ($currentUserId) {
-                // Get last message exchanged
                 $lastMessage = DirectMessage::where(function ($q) use ($currentUserId, $user) {
                         $q->where('sender_id', $currentUserId)->where('receiver_id', $user->id);
                     })
@@ -37,7 +30,6 @@ class DirectMessageController extends Controller
                     ->latest()
                     ->first();
 
-                // Count unread messages
                 $unreadCount = DirectMessage::where('sender_id', $user->id)
                     ->where('receiver_id', $currentUserId)
                     ->where('is_read', false)
@@ -57,22 +49,16 @@ class DirectMessageController extends Controller
                 ];
             })
             ->sortByDesc(function ($contact) {
-                // Online users first, then users with recent messages
                 return [$contact['status'] === 'online' ? 1 : 0, $contact['last_message_time'] ? 1 : 0];
             })
             ->values();
 
         return response()->json($users);
     }
-
-    /**
-     * Get chat history with a specific user.
-     */
     public function getHistory($userId)
     {
         $currentUserId = auth()->id();
 
-        // Mark incoming messages as read
         DirectMessage::where('sender_id', $userId)
             ->where('receiver_id', $currentUserId)
             ->where('is_read', false)
@@ -100,9 +86,6 @@ class DirectMessageController extends Controller
         return response()->json($messages);
     }
 
-    /**
-     * Send a direct message.
-     */
     public function sendMessage(Request $request)
     {
         $request->validate([
@@ -130,9 +113,6 @@ class DirectMessageController extends Controller
         ]);
     }
 
-    /**
-     * Mark all incoming messages from sender as read.
-     */
     public function markAsRead($senderId)
     {
         DirectMessage::where('sender_id', $senderId)

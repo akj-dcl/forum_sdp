@@ -15,9 +15,6 @@ class SdpMasterService
         $this->token = config('services.sdp.token');
     }
 
-    /**
-     * HTTP Client ke SDP
-     */
     protected function client()
     {
         return Http::withToken($this->token)
@@ -25,9 +22,6 @@ class SdpMasterService
             ->timeout(60);
     }
 
-    /**
-     * GET Request umum
-     */
     protected function get(string $endpoint)
     {
         return $this->client()
@@ -36,17 +30,11 @@ class SdpMasterService
             ->json();
     }
 
-    /**
-     * Master Kanwil
-     */
     public function getKanwil()
     {
         return $this->get('/kanwil/v1/daftarringkas');
     }
 
-    /**
-     * Master UPT
-     */
     public function getUpt()
     {
         return $this->get('/upt/v1/daftar');

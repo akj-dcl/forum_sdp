@@ -13,9 +13,9 @@ type User = {
   jabatan: string
   upt_id: number | null
   roles: { id: number; name: string }[]
-  upt?: { id: number; name: string } // Tambahan relasi UPT
-  kanwil?: { id: number; name: string } // Tambahan relasi Kanwil
-  jenis_golongan?: { id: number; nama_golongan: string } // Tambahan relasi Golongan
+  upt?: { id: number; name: string }
+  kanwil?: { id: number; name: string }
+  jenis_golongan?: { id: number; nama_golongan: string }
 }
 
 type PaginationLink = { url: string | null; label: string; active: boolean }
@@ -40,11 +40,10 @@ watch(
     const params = new URLSearchParams();
     if (newSearch) params.append('search', newSearch);
     
-    // Ganti window.location dengan router.get dari Inertia
     router.get(window.location.pathname, Object.fromEntries(params), {
       preserveState: true,
       preserveScroll: true,
-      replace: true // Supaya riwayat back button tidak dipenuhi hasil pencarian tiap huruf
+      replace: true 
     });
   }, 300)
 )

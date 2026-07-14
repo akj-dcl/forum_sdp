@@ -12,19 +12,14 @@ use Inertia\Inertia;
 
 class ProfileController extends Controller
 {
-    /**
-     * Show user profile details and their feed activity.
-     */
     public function show(User $user = null)
     {
         if (!$user) {
             $user = auth()->user();
         }
 
-        // Load relationships
         $user->load(['upt', 'kanwil', 'jenisGolongan']);
 
-        // Fetch posts written by this user
         $posts = Post::with(['user.upt', 'user.kanwil', 'channel', 'reactions', 'comments.user'])
             ->where('user_id', $user->id)
             ->latest()
@@ -74,7 +69,6 @@ class ProfileController extends Controller
                 ];
             });
 
-        // Fetch comments written by this user
         $comments = Comment::with('post')
             ->where('user_id', $user->id)
             ->latest()
@@ -89,7 +83,6 @@ class ProfileController extends Controller
                 ];
             });
 
-        // Format user details for page display
         $profileUser = [
             'id' => $user->id,
             'name' => $user->name,
@@ -111,13 +104,10 @@ class ProfileController extends Controller
         ]);
     }
 
-    /**
-     * Upload / Update profile avatar photo.
-     */
     public function uploadAvatar(Request $request)
     {
         $request->validate([
-            'avatar' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120' // max 5MB
+            'avatar' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120'
         ]);
 
         $user = auth()->user();
@@ -132,13 +122,10 @@ class ProfileController extends Controller
         return redirect()->back();
     }
 
-    /**
-     * Upload / Update profile cover banner photo.
-     */
     public function uploadBanner(Request $request)
     {
         $request->validate([
-            'banner' => 'required|image|mimes:jpeg,png,jpg,gif|max:10240' // max 10MB
+            'banner' => 'required|image|mimes:jpeg,png,jpg,gif|max:10240'
         ]);
 
         $user = auth()->user();

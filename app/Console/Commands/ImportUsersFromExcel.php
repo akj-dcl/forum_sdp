@@ -30,20 +30,16 @@ class ImportUsersFromExcel extends Command
         DB::table('direct_messages')->truncate();
         DB::table('corporate_highlights')->truncate();
         
-        // Delete users with id > 1
         DB::table('users')->where('id', '>', 1)->delete();
         
-        // Delete roles/permissions assignment for users with id > 1
         DB::table('model_has_roles')->where('model_id', '>', 1)->delete();
         DB::table('model_has_permissions')->where('model_id', '>', 1)->delete();
         
-        // Reset Auto-Increment to 2
         DB::statement('ALTER TABLE users AUTO_INCREMENT = 2;');
         DB::statement('SET FOREIGN_KEY_CHECKS = 1;');
         $this->info("Database cleanup completed successfully!");
 
         $this->info("Loading Excel file...");
-        // Temporarily suppress simplexml warnings to prevent Laravel from throwing ErrorException
         set_error_handler(function($errno, $errstr) {
             return (strpos($errstr, 'simplexml_load_string') !== false);
         });
@@ -58,12 +54,11 @@ class ImportUsersFromExcel extends Command
         $totalRolesCreated = 0;
         $totalUsersImported = 0;
 
-        // Step 1: Collect and insert all roles first
         $this->info("Step 1: Importing and creating all unique roles...");
         $uniqueRoles = [];
         foreach ($spreadsheet->getAllSheets() as $sheet) {
             $rows = $sheet->toArray(null, true, true, true);
-            array_shift($rows); // Remove header
+            array_shift($rows);
             foreach ($rows as $row) {
                 $roleField = $row['D'] ?? '';
                 if (empty($roleField)) continue;
@@ -81,15 +76,13 @@ class ImportUsersFromExcel extends Command
             $totalRolesCreated++;
         }
         $this->info("Successfully registered {$totalRolesCreated} unique roles in database.");
-
-        // Step 2: Import users sheet by sheet
         $this->info("Step 2: Importing users...");
         foreach ($spreadsheet->getAllSheets() as $sheet) {
             $sheetName = $sheet->getTitle();
             $this->info("Processing sheet: {$sheetName}...");
 
             $rows = $sheet->toArray(null, true, true, true);
-            array_shift($rows); // Remove header
+            array_shift($rows);
 
             $currentKanwil = null;
             $currentUpt = null;
@@ -97,35 +90,24 @@ class ImportUsersFromExcel extends Command
             foreach ($rows as $row) {
                 $nama = trim($row['E'] ?? '');
                 if (empty($nama)) continue;
-
-                // Carry forward Kanwil and UPT
                 if (!empty($row['B'])) {
                     $currentKanwil = trim($row['B']);
                 }
                 if (!empty($row['C'])) {
                     $currentUpt = trim($row['C']);
                 }
-
-                // Resolve Kanwil ID
                 $kanwilId = null;
                 if (!empty($currentKanwil)) {
                     $kanwilId = $this->resolveKanwilId($currentKanwil, $dbKanwils);
                 }
-
-                // Resolve UPT ID
                 $uptId = null;
                 if (!empty($currentUpt)) {
                     $uptId = $this->resolveUptId($currentUpt, $kanwilId, $dbUpts);
                 }
-
-                // Resolve Golongan ID
                 $golonganField = trim($row['G'] ?? '');
                 $golonganId = $this->getGolonganId($golonganField);
-
-                // NIP & Password
                 $nip = trim($row['F'] ?? '');
                 if (empty($nip) || $nip === '-') {
-                    // Generate unique 18 digit NIP
                     do {
                         $nip = '9999' . mt_rand(10000000, 99999999) . mt_rand(100000, 999999);
                     } while (User::where('username', $nip)->orWhere('nip', $nip)->exists());
@@ -138,19 +120,14 @@ class ImportUsersFromExcel extends Command
                         'nip' => $nip
                     ];
                 }
-
-                // Roles for user
                 $roleField = $row['D'] ?? '';
                 $userRoles = [];
                 if (!empty($roleField)) {
                     $userRoles = array_map('trim', explode(',', $roleField));
-                    // filter out empty values
                     $userRoles = array_filter($userRoles, function($r) {
                         return $r !== '';
                     });
                 }
-
-                // Create or Update User
                 $user = User::updateOrCreate(
                     ['username' => $nip],
                     [
@@ -186,8 +163,6 @@ class ImportUsersFromExcel extends Command
     private function resolveKanwilId($name, $dbKanwils)
     {
         $cleanName = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $name));
-        
-        // Manual override mappings
         $overrides = [
             'ntt' => 'nusatenggaratimur',
             'daerahistimewayogyakarta' => 'diyogyakarta',
@@ -212,14 +187,11 @@ class ImportUsersFromExcel extends Command
     private function resolveUptId($name, $kanwilId, $dbUpts)
     {
         $cleanName = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $name));
-        
-        // If UPT is "-" or "Kanwil" (level penempatan Kantor Wilayah), return null
         if ($cleanName === '' || $cleanName === '-' || $cleanName === 'kanwil') {
             return null;
         }
 
         foreach ($dbUpts as $u) {
-            // If we have a kanwilId, filter matching UPTs by Kanwil first
             if ($kanwilId !== null && $u->kanwil_id !== $kanwilId) {
                 continue;
             }
@@ -228,8 +200,6 @@ class ImportUsersFromExcel extends Command
                 return $u->id;
             }
         }
-
-        // Fallback: match without Kanwil filter if Kanwil is null or first pass failed
         foreach ($dbUpts as $u) {
             $cleanDbName = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $u->name));
             if ($cleanDbName === $cleanName) {

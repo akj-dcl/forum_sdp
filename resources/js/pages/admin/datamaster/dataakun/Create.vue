@@ -10,7 +10,6 @@ const props = defineProps<{
     jenisGolongans: { id: number, nama_golongan: string }[];
 }>();
 
-// Filtered UPT list based on selected Kanwil
 const filteredUpts = computed(() => {
     if (!form.kanwil_id) return [];
     return props.upts.filter(upt => upt.kanwil_id === form.kanwil_id);
@@ -52,7 +51,6 @@ const removeRole = (roleName: string) => {
     }
 };
 
-// Watch Kanwil change to reset selected UPT
 watch(() => form.kanwil_id, () => {
     form.upt_id = '';
 });
@@ -100,7 +98,6 @@ const submit = () => {
                         <div class="space-y-2 md:col-span-2">
                             <label class="text-sm font-medium leading-none">Hak Akses (Role) *</label>
                             
-                            <!-- Custom Searchable Multiple Select Dropdown -->
                             <div class="relative">
                                 <button type="button" @click="isOpen = !isOpen" class="flex min-h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring select-none text-left">
                                     <div class="flex flex-wrap gap-1 min-h-[20px] items-center">

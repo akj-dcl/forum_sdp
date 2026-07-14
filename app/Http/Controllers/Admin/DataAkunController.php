@@ -79,12 +79,9 @@ class DataAkunController extends Controller
 
         return redirect()->route('data-akun.index')->with('success', 'Akun pegawai berhasil dibuat.');
     }
-
-    // ... fungsi index, create, store biarkan saja ...
-
-    public function edit($id) // Ubah parameter jadi $id
+    public function edit($id) 
     {
-        $user = User::findOrFail($id); // Cari data manual berdasarkan ID
+        $user = User::findOrFail($id); 
 
         $user->load(['roles', 'upt', 'kanwil']);
         $roles = Role::where('name', '!=', 'Pengunjung')->get();
@@ -103,10 +100,9 @@ class DataAkunController extends Controller
         ]);
     }
 
-    // 2. UBAH FUNGSI UPDATE
-    public function update(Request $request, $id) // Ubah parameter jadi $id
+    public function update(Request $request, $id)
     {
-        $user = User::findOrFail($id); // Cari data manual berdasarkan ID
+        $user = User::findOrFail($id);
 
         $request->validate([
             'name' => 'required|string|max:255',
@@ -138,10 +134,9 @@ class DataAkunController extends Controller
         return redirect()->route('data-akun.index')->with('success', 'Akun pegawai berhasil diperbarui.');
     }
 
-    // 3. UBAH FUNGSI DESTROY
-    public function destroy($id) // Ubah parameter jadi $id
+    public function destroy($id)
     {
-        $user = User::findOrFail($id); // Cari data manual berdasarkan ID
+        $user = User::findOrFail($id);
         
         $user->delete();
         return redirect()->route('data-akun.index')->with('success', 'Akun berhasil dihapus.');

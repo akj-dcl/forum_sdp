@@ -14,8 +14,7 @@ class FileStreamController extends Controller
         if (!Storage::disk('google')->exists($path)) {
             abort(404, 'File tidak ditemukan di Google Drive');
         }
-
-        // Cara paling aman membaca file dari Cloud
+        
         $file = Storage::disk('google')->get($path);
         $mimeType = Storage::disk('google')->mimeType($path);
 

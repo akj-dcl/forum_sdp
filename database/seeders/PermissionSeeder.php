@@ -14,7 +14,6 @@ class PermissionSeeder extends Seeder
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         $permissions = [
-            //Milik Kanwil dan Super Admin
             'jenis-golongans.vue', 'jenis-golongans.create', 'jenis-golongans.edit', 'jenis-golongans.delete',
         ];
 

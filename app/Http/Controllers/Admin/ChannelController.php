@@ -13,9 +13,9 @@ class ChannelController extends Controller
     public function index(Request $request)
     {
         $channels = Channel::when($request->search, function ($query, $search) {
-                $query->where('name', 'like', "%{$search}%")
-                      ->orWhere('description', 'like', "%{$search}%");
-            })
+            $query->where('name', 'like', "%{$search}%")
+                ->orWhere('description', 'like', "%{$search}%");
+        })
             ->latest()
             ->paginate(10)
             ->withQueryString();
@@ -31,7 +31,7 @@ class ChannelController extends Controller
         $request->validate([
             'name' => 'required|string|max:255|unique:channels,name',
             'description' => 'nullable|string',
-            'color' => 'required|string|max:7', 
+            'color' => 'required|string|max:7',
         ]);
 
         Channel::create([

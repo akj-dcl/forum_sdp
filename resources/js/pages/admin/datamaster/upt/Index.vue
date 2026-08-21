@@ -3,7 +3,7 @@ import AppLayout from '@/layouts/AppLayout.vue'
 import { Head, Link, router, usePage } from '@inertiajs/vue3'
 import { ref, watch } from 'vue'
 import { debounce } from 'lodash'
-import { can } from '@/lib/can' 
+import { can } from '@/lib/can'
 
 type Kanwil = { id: number; name: string }
 type Upt = {
@@ -27,6 +27,7 @@ const props = defineProps<{
   filters: {
     search?: string
   }
+  uptKosong: Upt[]
 }>()
 
 const page = usePage()
@@ -37,7 +38,7 @@ watch(
   debounce((newSearch: string) => {
     const params = new URLSearchParams();
     if (newSearch) params.append('search', newSearch);
-    
+
     // Ganti window.location dengan router.get dari Inertia
     router.get(window.location.pathname, Object.fromEntries(params), {
       preserveState: true,
@@ -46,6 +47,8 @@ watch(
     });
   }, 300)
 )
+
+const showEmptyUpts = ref(false);
 
 function destroyUpt(id: number) {
   if (!confirm('Yakin mau hapus UPT ini?')) return
@@ -57,7 +60,7 @@ function destroyUpt(id: number) {
   <Head title="Master UPT" />
 
   <AppLayout>
-    <div class="flex h-full flex-1 flex-col gap-4 p-4 md:p-6 bg-background text-foreground">
+    <div class="flex h-full flex-1 flex-col gap-4 p-4 md:p-6 bg-background text-foreground dark:bg-inverse-surface">
       <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 class="text-2xl font-semibold tracking-tight">Master UPT</h1>
@@ -65,7 +68,7 @@ function destroyUpt(id: number) {
         </div>
 
         <Link
-          v-if="can('upts.create')" 
+          v-if="can('upts.create')"
           href="/admin/upts/create"
           class="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow hover:opacity-90 transition-colors"
         >
@@ -87,8 +90,24 @@ function destroyUpt(id: number) {
           placeholder="Cari nama UPT atau alamat..."
           class="col-span-1 md:col-span-2 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         />
+        <button @click="showEmptyUpts = !showEmptyUpts" class="inline-flex items-center justify-center rounded-md border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground text-sm font-medium transition-colors h-10 px-4">
+          {{ showEmptyUpts ? 'Hide' : 'Show' }} Filtered Upts ({{ uptKosong?.length }})
+        </button>
       </div>
+      <div v-if="showEmptyUpts" class="rounded-xl border border-border bg-card p-4 shadow-sm mb-4">
+        <h3 class="font-semibold text-lg mb-3">Daftar UPT Filtered</h3>
 
+        <ul class="list-disc pl-5 space-y-1">
+          <li v-for="upt in uptKosong" :key="upt.id" class="text-sm text-muted-foreground">
+            <span class="font-medium text-foreground">{{ upt.name }}</span>
+            (Kode: {{ upt.kanwil_id ?? '-' }})
+          </li>
+        </ul>
+
+        <p v-if="!uptKosong?.length" class="text-sm text-muted-foreground italic mt-2">
+          Tidak ada data UPT yang sesuai dengan filter.
+        </p>
+      </div>
       <div class="rounded-xl border border-border bg-card text-card-foreground shadow-sm overflow-hidden">
         <div class="relative w-full overflow-auto">
           <table class="w-full caption-bottom text-sm">
@@ -124,14 +143,14 @@ function destroyUpt(id: number) {
                 <td class="p-4 text-right align-middle">
                   <div class="flex justify-end gap-2">
                     <Link
-                      v-if="can('upts.edit')" 
+                      v-if="can('upts.edit')"
                       :href="`/admin/upts/${u.id}/edit`"
                       class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-input bg-transparent shadow-sm hover:bg-accent hover:text-accent-foreground h-8 px-3"
                     >
                       Edit
                     </Link>
                     <button
-                      v-if="can('upts.delete')" 
+                      v-if="can('upts.delete')"
                       type="button"
                       @click="destroyUpt(u.id)"
                       class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90 h-8 px-3"
@@ -165,12 +184,12 @@ function destroyUpt(id: number) {
             <Link
               v-else
               :href="link.url"
-              preserve-state 
+              preserve-state
               preserve-scroll
               class="px-3 py-1 text-sm rounded-md border transition-colors"
               :class="link.active
                 ? 'bg-primary text-primary-foreground border-primary'
-                : 'border-border bg-background hover:bg-accent hover:text-accent-foreground'"
+                : 'border-border bg-background hover:bg-accent hover:text-accent-foreground bg-card'"
               v-html="link.label"
             />
           </template>

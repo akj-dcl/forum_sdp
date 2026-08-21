@@ -34,7 +34,7 @@ watch(
   debounce((newSearch: string) => {
     const params = new URLSearchParams()
     if (newSearch) params.append('search', newSearch)
-    
+
     router.get(window.location.pathname, Object.fromEntries(params), {
       preserveState: true,
       preserveScroll: true,
@@ -99,11 +99,11 @@ const destroyChannel = (id: number) => {
   <Head title="Manajemen Saluran" />
 
   <AppLayout>
-    <div class="flex h-full flex-1 flex-col gap-6 p-4 md:p-6 bg-surface text-on-surface">
+    <div class="flex h-full flex-1 flex-col gap-6 p-4 md:p-6 bg-surface text-on-surface dark:bg-inverse-surface">
       <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 class="text-2xl font-bold tracking-tight text-on-surface">Manajemen Saluran</h1>
-          <p class="text-sm text-on-surface-variant">Kelola saluran (channels) untuk timeline dan feed umum.</p>
+          <h1 class="text-2xl font-bold tracking-tight text-on-surface dark:text-white">Manajemen Saluran</h1>
+          <p class="text-sm text-on-surface-variant dark:text-surface-variant">Kelola saluran (channels) untuk timeline dan feed umum.</p>
         </div>
 
         <button
@@ -121,7 +121,7 @@ const destroyChannel = (id: number) => {
         {{ page.props.flash.success }}
       </div>
 
-      <div class="grid gap-3 md:grid-cols-4">
+      <div class="grid gap-3 md:grid-cols-4 dark:bg-inverse-surface">
         <div class="relative col-span-1 md:col-span-2">
           <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[20px]">search</span>
           <input
@@ -133,18 +133,18 @@ const destroyChannel = (id: number) => {
         </div>
       </div>
 
-      <div class="rounded-xl border border-outline-variant bg-surface-container-lowest text-on-surface shadow-sm overflow-hidden">
+      <div class="rounded-xl border bg-card border-outline-variant bg-surface-container-lowest text-on-surface shadow-sm overflow-hidden">
         <div class="relative w-full overflow-auto">
-          <table class="w-full caption-bottom text-sm border-collapse">
+          <table class="w-full caption-bottom text-sm border-collapse ">
             <thead class="bg-surface-container border-b border-outline-variant">
-              <tr>
-                <th class="h-12 px-4 text-left align-middle font-semibold text-on-surface-variant">Warna</th>
-                <th class="h-12 px-4 text-left align-middle font-semibold text-on-surface-variant">Nama Saluran</th>
-                <th class="h-12 px-4 text-left align-middle font-semibold text-on-surface-variant">Deskripsi</th>
-                <th class="h-12 px-4 text-right align-middle font-semibold text-on-surface-variant">Aksi</th>
+              <tr class="bg-card">
+                <th class="h-12 px-4 text-left align-middle font-semibold text-on-surface-variant dark:text-white">Warna</th>
+                <th class="h-12 px-4 text-left align-middle font-semibold text-on-surface-variant dark:text-white">Nama Saluran</th>
+                <th class="h-12 px-4 text-left align-middle font-semibold text-on-surface-variant dark:text-white">Deskripsi</th>
+                <th class="h-12 px-4 text-right align-middle font-semibold text-on-surface-variant dark:text-white  ">Aksi</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-outline-variant">
+            <tbody class="divide-y divide-outline-variant bg-card">
               <tr
                 v-for="ch in channelsData.data"
                 :key="ch.id"
@@ -154,17 +154,17 @@ const destroyChannel = (id: number) => {
                   <div class="w-6 h-6 rounded-full border border-outline-variant" :style="{ backgroundColor: ch.color }"></div>
                 </td>
                 <td class="p-4 align-middle">
-                  <div class="font-bold text-on-surface">{{ ch.name }}</div>
-                  <div class="text-xs text-on-surface-variant">Slug: {{ ch.slug }}</div>
+                  <div class="font-bold text-on-surface dark:text-white">{{ ch.name }}</div>
+                  <div class="text-xs text-on-surface-variant dark:text-surface-variant">Slug: {{ ch.slug }}</div>
                 </td>
-                <td class="p-4 align-middle text-on-surface-variant">
+                <td class="p-4 align-middle text-on-surface-variant dark:text-surface-variant">
                   {{ ch.description || '-' }}
                 </td>
                 <td class="p-4 text-right align-middle">
                   <div class="flex justify-end gap-2">
                     <button
                       @click="openEditModal(ch)"
-                      class="inline-flex items-center justify-center rounded-lg border border-outline bg-transparent hover:bg-surface-container-high transition-colors h-9 px-4 text-xs font-semibold text-on-surface cursor-pointer"
+                      class="inline-flex items-center justify-center rounded-lg dark:text-white border border-outline bg-transparent hover:bg-surface-container-high transition-colors h-9 px-4 text-xs font-semibold text-on-surface cursor-pointer"
                     >
                       Edit
                     </button>
@@ -202,7 +202,7 @@ const destroyChannel = (id: number) => {
             <Link
               v-else
               :href="link.url"
-              preserve-state 
+              preserve-state
               preserve-scroll
               class="px-3 py-1.5 text-sm rounded-lg border transition-colors cursor-pointer"
               :class="link.active

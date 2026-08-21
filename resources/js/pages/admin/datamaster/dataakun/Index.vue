@@ -12,6 +12,7 @@ type User = {
   nip: string
   jabatan: string
   upt_id: number | null
+  jenis_upts_id: number | null
   roles: { id: number; name: string }[]
   upt?: { id: number; name: string }
   kanwil?: { id: number; name: string }
@@ -39,11 +40,11 @@ watch(
   debounce((newSearch: string) => {
     const params = new URLSearchParams();
     if (newSearch) params.append('search', newSearch);
-    
+
     router.get(window.location.pathname, Object.fromEntries(params), {
       preserveState: true,
       preserveScroll: true,
-      replace: true 
+      replace: true
     });
   }, 300)
 )
@@ -57,7 +58,7 @@ const deleteUser = (id: number) => {
   <Head title="Data Akun Pegawai" />
 
   <AppLayout>
-    <div class="flex h-full flex-1 flex-col gap-4 p-4 md:p-6 bg-background text-foreground">
+    <div class="flex h-full flex-1 flex-col gap-4 p-4 md:p-6 bg-background text-foreground dark:bg-inverse-surface dark:bg-inverse-surface">
       <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 class="text-2xl font-semibold tracking-tight">Data Akun Pegawai</h1>
@@ -112,15 +113,20 @@ const deleteUser = (id: number) => {
                   </div>
                 </td>
                 <td class="p-4">
-                  <span v-if="u.upt" class="font-medium text-emerald-700">{{ u.upt.name }}</span>
-                  <span v-else-if="u.kanwil" class="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
+                    <div class="flex flex-wrap gap-1 max-w-[250px]">
+                  <span v-if="u.upt && u.upt.jenis_upts_id === 1" class="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-semibold text-green-700 dark:bg-green-900/30 dark:text-green-400 uppercase select-none">{{ u.upt.name }}</span>
+                  <span v-else-if="u.upt && u.upt.jenis_upts_id === 2" class="inline-flex items-center rounded-full bg-pink-100 px-2 py-0.5 text-[10px] font-semibold text-green-700 dark:bg-green-900/30 dark:text-green-400 uppercase select-none">{{ u.upt.name }}</span>
+                  <span v-else-if="u.upt && u.upt.jenis_upts_id === 3" class="inline-flex items-center rounded-full bg-yellow-100 px-2 py-0.5 text-[10px] font-semibold text-green-700 dark:bg-green-900/30 dark:text-green-400 uppercase select-none">{{ u.upt.name }}</span>
+                  <span v-else-if="u.upt && u.upt.jenis_upts_id === 4" class="inline-flex items-center rounded-full bg-orange-100 px-2 py-0.5 text-[10px] font-semibold text-green-700 dark:bg-green-900/30 dark:text-green-400 uppercase select-none">{{ u.upt.name }}</span>
+                  <span v-else-if="u.kanwil" class="inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 uppercase select-none">
                     Kanwil {{ u.kanwil.name }}
                   </span>
                   <span v-else class="inline-flex items-center rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">Pusat</span>
+                </div>
                 </td>
                 <td class="p-4 text-right align-middle">
                   <div class="flex justify-end gap-2">
-                    <Link v-if="can('akun.edit')" :href="`/admin/data-akun/${u.id}/edit`" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-input bg-transparent shadow-sm hover:bg-accent hover:text-accent-foreground h-8 px-3">Edit</Link>
+                    <Link v-if="can('akun.edit')" :href="`/admin/data-akun/${u.id}/edit`" class="inline-flex items-center justify-center rounded-md text-sm dark:border-white font-medium transition-colors border border-input bg-transparent shadow-sm hover:bg-accent hover:text-accent-foreground h-8 px-3">Edit</Link>
                     <button v-if="can('akun.delete')" type="button" @click="deleteUser(u.id)" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90 h-8 px-3">Hapus</button>
                   </div>
                 </td>
@@ -138,7 +144,7 @@ const deleteUser = (id: number) => {
         <div class="flex gap-1">
           <template v-for="(link, key) in users.links" :key="key">
             <div v-if="link.url === null" class="px-3 py-1 text-sm text-muted-foreground border border-transparent" v-html="link.label" />
-            <Link v-else :href="link.url" preserve-state preserve-scroll class="px-3 py-1 text-sm rounded-md border transition-colors" :class="link.active ? 'bg-primary text-primary-foreground border-primary' : 'border-border bg-background hover:bg-accent hover:text-accent-foreground'" v-html="link.label" />
+            <Link v-else :href="link.url" preserve-state preserve-scroll class="px-3 py-1 text-sm rounded-md border transition-colors" :class="link.active ? 'bg-primary text-primary-foreground border-primary' : 'border-border bg-background hover:bg-accent hover:text-accent-foreground bg-card bg-card'" v-html="link.label" />
           </template>
         </div>
       </div>

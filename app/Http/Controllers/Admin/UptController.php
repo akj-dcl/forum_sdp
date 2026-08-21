@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Kanwil;
+use Illuminate\Database\Eloquent\Builder;
 use App\Models\Upt;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -14,14 +15,21 @@ class UptController extends Controller
     {
         $upts = Upt::with('kanwil')
             ->when($request->search, function ($query, $search) {
-                $query->where('name', 'like', "%{$search}%");
+                $query->where('name', 'like', "%{$search}%")
+                    ->orWhere('address', 'like', "%{$search}%")
+                    ->orWhereHas('kanwil', function ($query) use ($search) {
+                        $query->where('name', 'like', "%{$search}%");
+                    });
             })
             ->paginate(10)
             ->withQueryString();
-
+        $uptKosong = Upt::whereDoesntHave('users', function (Builder $query) {
+            $query->where('name', '!=', '-');
+        })->get();
         return Inertia::render('admin/datamaster/upt/Index', [
             'upts' => $upts,
-            'filters' => $request->only(['search'])
+            'filters' => $request->only(['search']),
+            'uptKosong' => $uptKosong,
         ]);
     }
 

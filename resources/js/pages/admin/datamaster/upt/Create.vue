@@ -27,7 +27,7 @@ function submit() {
   <Head title="Tambah UPT" />
 
   <AppLayout>
-    <div class="flex h-full flex-1 flex-col gap-4 p-4 md:p-6 bg-background text-foreground">
+    <div class="flex h-full flex-1 flex-col gap-4 p-4 md:p-6 bg-background text-foreground dark:bg-inverse-surface">
       <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 class="text-2xl font-semibold tracking-tight">Tambah UPT</h1>
@@ -45,7 +45,7 @@ function submit() {
       <div class="rounded-xl border border-border bg-card text-card-foreground shadow-sm">
         <form @submit.prevent="submit" class="p-6 space-y-6">
           <div class="grid gap-6 md:grid-cols-2">
-            
+
             <div class="md:col-span-2 space-y-2">
               <label class="text-sm font-medium leading-none">Kanwil</label>
               <select
@@ -91,7 +91,7 @@ function submit() {
                 <label for="is_active" class="text-sm font-medium leading-none cursor-pointer">Status Aktif</label>
               </div>
             </div>
-            
+
           </div>
 
           <div class="flex justify-end pt-4 border-t mt-6">

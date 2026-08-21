@@ -9,6 +9,7 @@ class Post extends Model
     protected $fillable = [
         'user_id',
         'channel_id',
+        'is_pinned',
         'content',
         'attachment_path',
         'attachment_name',

@@ -33,7 +33,7 @@ function submit() {
   <Head title="Tambah Role" />
 
   <AppLayout>
-    <div class="flex h-full flex-1 flex-col gap-4 p-4 md:p-6 bg-background text-foreground">
+    <div class="flex h-full flex-1 flex-col gap-4 p-4 md:p-6 bg-background text-foreground dark:bg-inverse-surface">
       <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 class="text-2xl font-semibold tracking-tight">Tambah Role</h1>
@@ -66,7 +66,7 @@ function submit() {
 
             <div class="md:col-span-2 space-y-4 mt-4">
               <label class="text-sm font-medium leading-none border-b pb-2 block">Pilih Hak Akses (Permissions)</label>
-              
+
               <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-2">
                 <div v-for="(perms, groupName) in groupedPermissions" :key="groupName" class="space-y-3 bg-muted/30 p-4 rounded-lg border border-border">
                   <h3 class="font-semibold text-sm capitalize text-foreground border-b border-border pb-1 mb-2">
@@ -88,7 +88,7 @@ function submit() {
                   </div>
                 </div>
               </div>
-              
+
               <div v-if="form.errors.permissions" class="text-sm font-medium text-destructive">{{ form.errors.permissions }}</div>
             </div>
             </div>

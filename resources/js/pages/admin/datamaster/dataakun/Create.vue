@@ -64,7 +64,7 @@ const submit = () => {
     <Head title="Tambah Akun Pegawai" />
 
     <AppLayout>
-        <div class="flex h-full flex-1 flex-col gap-4 p-4 md:p-6 bg-background text-foreground">
+        <div class="flex h-full flex-1 flex-col gap-4 p-4 md:p-6 bg-background text-foreground dark:bg-inverse-surface">
             <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                 <div>
                     <h1 class="text-2xl font-semibold tracking-tight">Tambah Akun Pegawai</h1>
@@ -76,7 +76,7 @@ const submit = () => {
             <div class="rounded-xl border border-border bg-card text-card-foreground shadow-sm">
                 <form @submit.prevent="submit" class="p-6 space-y-6">
                     <div class="grid gap-6 md:grid-cols-2">
-                        
+
                         <div class="space-y-2">
                             <label class="text-sm font-medium leading-none">Nama Lengkap Pegawai *</label>
                             <input v-model="form.name" type="text" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50" required />
@@ -97,7 +97,7 @@ const submit = () => {
 
                         <div class="space-y-2 md:col-span-2">
                             <label class="text-sm font-medium leading-none">Hak Akses (Role) *</label>
-                            
+
                             <div class="relative">
                                 <button type="button" @click="isOpen = !isOpen" class="flex min-h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring select-none text-left">
                                     <div class="flex flex-wrap gap-1 min-h-[20px] items-center">

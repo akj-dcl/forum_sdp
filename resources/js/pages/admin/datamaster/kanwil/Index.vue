@@ -3,7 +3,7 @@ import AppLayout from '@/layouts/AppLayout.vue'
 import { Head, Link, router, usePage } from '@inertiajs/vue3'
 import { ref, watch } from 'vue'
 import { debounce } from 'lodash'
-import { can } from '@/lib/can' 
+import { can } from '@/lib/can'
 
 type Kanwil = {
   id: number
@@ -35,7 +35,7 @@ watch(
   debounce((newSearch: string) => {
     const params = new URLSearchParams();
     if (newSearch) params.append('search', newSearch);
-    
+
     // Ganti window.location dengan router.get dari Inertia
     router.get(window.location.pathname, Object.fromEntries(params), {
       preserveState: true,
@@ -55,7 +55,7 @@ function destroyKanwil(id: number) {
   <Head title="Master Kanwil" />
 
   <AppLayout>
-    <div class="flex h-full flex-1 flex-col gap-4 p-4 md:p-6 bg-background text-foreground">
+    <div class="flex h-full flex-1 flex-col gap-4 p-4 md:p-6 bg-background text-foreground dark:bg-inverse-surface">
       <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 class="text-2xl font-semibold tracking-tight">Master Kanwil</h1>
@@ -86,6 +86,7 @@ function destroyKanwil(id: number) {
           class="col-span-1 md:col-span-2 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         />
       </div>
+
 
       <div class="rounded-xl border border-border bg-card text-card-foreground shadow-sm overflow-hidden">
         <div class="relative w-full overflow-auto">
@@ -157,18 +158,18 @@ function destroyKanwil(id: number) {
           <template v-for="(link, key) in kanwils.links" :key="key">
             <div
               v-if="link.url === null"
-              class="px-3 py-1 text-sm text-muted-foreground border border-transparent"
+              class="px-3 py-1 text-sm text-muted-foreground border border-transparent bg-card"
               v-html="link.label"
             />
             <Link
               v-else
               :href="link.url"
-              preserve-state 
+              preserve-state
               preserve-scroll
               class="px-3 py-1 text-sm rounded-md border transition-colors"
               :class="link.active
                 ? 'bg-primary text-primary-foreground border-primary'
-                : 'border-border bg-background hover:bg-accent hover:text-accent-foreground'"
+                : 'border-border bg-background hover:bg-accent hover:text-accent-foreground bg-card'"
               v-html="link.label"
             />
           </template>

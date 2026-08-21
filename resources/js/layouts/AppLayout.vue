@@ -105,7 +105,7 @@ const openChat = async (contact: any) => {
     activeDmChat.value = contact;
     newDmMessage.value = '';
     await fetchChatHistory(contact.id);
-    
+
     // Poll for new messages every 3 seconds while chat is active
     if (historyPollInterval) clearInterval(historyPollInterval);
     historyPollInterval = setInterval(() => {
@@ -144,10 +144,10 @@ const fetchChatHistory = async (userId: number, quiet = false) => {
 
 const sendDmMessage = async () => {
     if (!newDmMessage.value.trim() || !activeDmChat.value) return;
-    
+
     const text = newDmMessage.value;
     newDmMessage.value = '';
-    
+
     try {
         const res = await axios.post('/api/direct-messages/send', {
             receiver_id: activeDmChat.value.id,
@@ -186,7 +186,7 @@ onBeforeUnmount(() => {
 
         <!-- SideNavBar -->
         <aside :class="[
-            'bg-surface-container-low dark:bg-surface-container-highest fixed left-0 top-0 h-full border-r border-outline-variant dark:border-outline flex flex-col py-6 gap-4 z-40 overflow-y-auto transition-all duration-300 lg:translate-x-0',
+            'bg-surface-container-low dark:bg-inverse-surface bg-surface-container-highest fixed left-0 top-0 h-full border-r border-outline-variant dark:border-outline flex flex-col py-6 gap-4 z-40 overflow-y-auto transition-all duration-300 lg:translate-x-0',
             isSidebarCollapsed ? 'w-16 px-2' : 'w-60 px-4',
             showMobileSidebar ? 'translate-x-0' : '-translate-x-full'
         ]">
@@ -197,7 +197,7 @@ onBeforeUnmount(() => {
                 </div>
                 <div v-if="!isSidebarCollapsed" class="min-w-0 transition-all duration-200">
                     <h2 class="text-headline-md font-display font-bold text-primary dark:text-inverse-primary truncate">C4</h2>
-                    <p class="font-label-sm text-label-sm text-on-surface-variant truncate">Cozy Corner Club</p>
+                    <p class="font-label-sm text-label-sm text-on-surface-variant truncate dark:text-surface-variant">Correctional Cozy Corner Conversation</p>
                 </div>
             </div>
 
@@ -221,7 +221,7 @@ onBeforeUnmount(() => {
                     <span class="material-symbols-outlined" :style="isActive('/dashboard') ? 'font-variation-settings: \'FILL\' 1;' : ''">home</span>
                     <span v-if="!isSidebarCollapsed" class="font-label-md text-label-md">Home Feed</span>
                 </Link>
-                
+
                 <Link :class="[
                     'flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200',
                     isSidebarCollapsed ? 'justify-center px-0 w-10 h-10 mx-auto' : '',
@@ -230,7 +230,7 @@ onBeforeUnmount(() => {
                     <span class="material-symbols-outlined" :style="isActive('/direct-messages') ? 'font-variation-settings: \'FILL\' 1;' : ''">chat</span>
                     <span v-if="!isSidebarCollapsed" class="font-label-md text-label-md">Direct Messages</span>
                 </Link>
-                
+
                 <!-- Dynamic Navigation depending on roles -->
                 <Link v-if="hasRole('Super Admin') || hasRole('Admin Kanwil')" :class="[
                     'flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200',
@@ -249,7 +249,7 @@ onBeforeUnmount(() => {
                     <span class="material-symbols-outlined" :style="isActive('/admin/kanwils') ? 'font-variation-settings: \'FILL\' 1;' : ''">account_balance</span>
                     <span v-if="!isSidebarCollapsed" class="font-label-md text-label-md">Kanwil</span>
                 </Link>
-                
+
                 <Link v-if="hasRole('Super Admin') || hasRole('Admin Kanwil')" :class="[
                     'flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200',
                     isSidebarCollapsed ? 'justify-center px-0 w-10 h-10 mx-auto' : '',
@@ -305,20 +305,20 @@ onBeforeUnmount(() => {
 
                 <!-- Prompt Categories -->
                 <div class="mt-4 mb-2 px-3 border-t border-outline-variant pt-2" :class="isSidebarCollapsed ? 'mx-auto w-8 px-0' : ''">
-                    <p v-if="!isSidebarCollapsed" class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Channels</p>
+                    <p v-if="!isSidebarCollapsed" class="font-label-sm text-label-sm text-outline uppercase tracking-wider dark:text-surface-variant">Channels</p>
                 </div>
                 <!-- General Home Feed Link -->
                 <Link :class="[
-                    'flex items-center gap-3 px-3 py-1.5 rounded-lg transition-colors',
+                    'flex items-center gap-3 px-3 py-1.5 rounded-lg transition-colors ',
                     isSidebarCollapsed ? 'justify-center px-0 w-10 h-10 mx-auto' : '',
-                    !$page.props.activeChannel ? 'bg-secondary-container text-on-secondary-container font-semibold' : 'text-on-surface-variant hover:bg-surface-container-high'
+                    !$page.props.activeChannel ? 'bg-secondary-container text-on-secondary-container font-semibold' : 'text-on-surface-variant hover:bg-surface-container-high dark:text-surface-variant'
                 ]" href="/dashboard" :title="isSidebarCollapsed ? 'General Feed' : ''">
                     <span class="material-symbols-outlined text-sm">home</span>
                     <span v-if="!isSidebarCollapsed" class="font-body-md text-body-md">General Feed</span>
                 </Link>
                 <!-- Dynamic Channels -->
                 <Link v-for="channel in ($page.props.channels as any[])" :key="channel.id" :class="[
-                    'flex items-center gap-3 px-3 py-1.5 rounded-lg transition-colors mt-1',
+                    'flex items-center gap-3 px-3 py-1.5 rounded-lg transition-colors mt-1 dark:text-surface-variant',
                     isSidebarCollapsed ? 'justify-center px-0 w-10 h-10 mx-auto' : '',
                     ($page.props.activeChannel as any)?.id === channel.id ? 'bg-secondary-container text-on-secondary-container font-semibold' : 'text-on-surface-variant hover:bg-surface-container-high'
                 ]" :href="`/dashboard?channel=${channel.slug}`" :title="isSidebarCollapsed ? channel.name : ''">
@@ -332,14 +332,14 @@ onBeforeUnmount(() => {
                 <Link :class="[
                     'flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200',
                     isSidebarCollapsed ? 'justify-center px-0 w-10 h-10 mx-auto' : '',
-                    isActive('/settings') ? 'bg-primary text-on-primary font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'
+                    isActive('/settings') ? 'bg-primary text-on-primary font-bold' : 'text-on-surface-variant hover:bg-surface-container-high dark:text-surface-variant '
                 ]" href="/settings" :title="isSidebarCollapsed ? 'Settings' : ''">
                     <span class="material-symbols-outlined" :style="isActive('/settings') ? 'font-variation-settings: \'FILL\' 1;' : ''">settings</span>
                     <span v-if="!isSidebarCollapsed" class="font-label-md text-label-md">Settings</span>
                 </Link>
                 <a :class="[
                     'flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-all duration-200',
-                    isSidebarCollapsed ? 'justify-center px-0 w-10 h-10 mx-auto' : ''
+                    isSidebarCollapsed ? 'justify-center px-0 w-10 h-10 mx-auto' : 'dark:text-surface-variant'
                 ]" href="#" :title="isSidebarCollapsed ? 'Help' : ''">
                     <span class="material-symbols-outlined">help</span>
                     <span v-if="!isSidebarCollapsed" class="font-label-md text-label-md">Help</span>
@@ -357,11 +357,11 @@ onBeforeUnmount(() => {
                 <!-- Left: Logo & Search -->
                 <div class="flex items-center gap-2 lg:gap-4">
                     <!-- Mobile Sidebar Toggle -->
-                    <button @click="showMobileSidebar = !showMobileSidebar" class="lg:hidden p-2 text-on-surface-variant hover:bg-surface-container-high rounded-full transition-colors flex items-center justify-center cursor-pointer border-none bg-transparent">
+                    <button @click="showMobileSidebar = !showMobileSidebar" class="lg:hidden p-2 text-on-surface-variant dark:text-surface-varianthover:bg-surface-container-high rounded-full transition-colors flex items-center justify-center cursor-pointer border-none bg-transparent">
                         <span class="material-symbols-outlined">{{ showMobileSidebar ? 'close' : 'menu' }}</span>
                     </button>
                     <!-- Desktop Sidebar Toggle -->
-                    <button @click="toggleSidebar" class="hidden lg:flex p-2 text-on-surface-variant hover:bg-surface-container-high rounded-full transition-colors items-center justify-center cursor-pointer border-none bg-transparent" title="Toggle Sidebar">
+                    <button @click="toggleSidebar" class="hidden lg:flex p-2 text-on-surface-variant hover:bg-surface-container-high rounded-full transition-colors items-center justify-center cursor-pointer border-none bg-transparent dark:text-surface-variant" title="Toggle Sidebar">
                         <span class="material-symbols-outlined">{{ isSidebarCollapsed ? 'menu' : 'menu_open' }}</span>
                     </button>
                     <Link href="/dashboard" class="text-headline-md font-display font-bold text-primary dark:text-inverse-primary hover:opacity-90 transition-opacity no-underline scale-95 active:scale-90 select-none">C4 Cozy Corner</Link>
@@ -387,11 +387,11 @@ onBeforeUnmount(() => {
 
                 <!-- Right: Actions & Profile -->
                 <div class="flex items-center gap-4 relative">
-                    <button class="relative p-2 text-on-surface-variant hover:bg-surface-container-high rounded-full transition-colors scale-95 active:scale-90 flex items-center justify-center cursor-pointer border-none bg-transparent">
+                    <Link href="/notifications" class="relative p-2 text-on-surface-variant hover:bg-surface-container-high rounded-full transition-colors scale-95 active:scale-90 flex items-center justify-center dark:text-surface-variant cursor-pointer border-none bg-transparent">
                         <span class="material-symbols-outlined">notifications</span>
                         <span class="absolute top-1 right-1 w-2.5 h-2.5 bg-error rounded-full border-2 border-surface"></span>
-                    </button>
-                    <Link href="/settings" class="p-2 text-on-surface-variant hover:bg-surface-container-high rounded-full transition-colors scale-95 active:scale-90 flex items-center justify-center">
+                    </Link>
+                    <Link href="/settings" class="p-2 text-on-surface-variant hover:bg-surface-container-high rounded-full transition-colors scale-95 active:scale-90 flex items-center justify-center dark:text-surface-variant">
                         <span class="material-symbols-outlined">settings</span>
                     </Link>
 
@@ -401,7 +401,7 @@ onBeforeUnmount(() => {
                             <img v-if="user.avatar" :src="user.avatar" class="w-full h-full object-cover" :alt="user.name" />
                             <span v-else>{{ getInitials(user.name) }}</span>
                         </button>
-                        
+
                         <div v-if="showUserMenu" class="absolute right-0 mt-2 w-56 bg-surface-container-lowest border border-outline-variant rounded-xl shadow-lg py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
                             <div class="px-4 py-2 border-b border-outline-variant">
                                 <p class="font-bold text-on-surface truncate">{{ user.name }}</p>
@@ -426,16 +426,16 @@ onBeforeUnmount(() => {
             </header>
 
             <!-- Page Content Slot -->
-            <main class="flex-1 w-full max-w-container-max mx-auto px-margin-desktop py-stack-lg flex flex-col">
+            <main class="flex-1 w-full dark:bg-inverse-surface max-w-container-max mx-auto px-margin-desktop py-stack-lg flex flex-col">
                 <!-- Breadcrumbs display if provided -->
                 <nav v-if="breadcrumbs && breadcrumbs.length > 0" class="flex items-center gap-2 text-xs text-on-surface-variant mb-6 select-none">
                     <template v-for="(item, idx) in breadcrumbs" :key="idx">
-                        <Link v-if="item.href" :href="item.href" class="hover:text-primary transition-colors font-medium">{{ item.title }}</Link>
+                        <Link v-if="item.href" :href="item.href" class="hover:text-primary transition-colors font-medium dark:text-surface-variant">{{ item.title }}</Link>
                         <span v-else class="text-on-surface font-semibold">{{ item.title }}</span>
                         <span v-if="idx < breadcrumbs.length - 1" class="text-outline-variant mx-1">/</span>
                     </template>
                 </nav>
-                
+
                 <slot />
             </main>
 

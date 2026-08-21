@@ -33,7 +33,7 @@ watch(
   debounce((newSearch: string) => {
     const params = new URLSearchParams()
     if (newSearch) params.append('search', newSearch)
-    
+
     router.get(window.location.pathname, Object.fromEntries(params), {
       preserveState: true,
       preserveScroll: true,
@@ -98,11 +98,11 @@ const destroyHighlight = (id: number) => {
   <Head title="Manajemen Corporate Highlights" />
 
   <AppLayout>
-    <div class="flex h-full flex-1 flex-col gap-6 p-4 md:p-6 bg-surface text-on-surface">
+    <div class="flex h-full flex-1 flex-col gap-6 p-4 md:p-6 bg-surface text-on-surface dark:bg-inverse-surface">
       <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 class="text-2xl font-bold tracking-tight text-on-surface">Manajemen Corporate Highlights</h1>
-          <p class="text-sm text-on-surface-variant">Kelola pengumuman penting (highlights) yang muncul di sidebar dashboard.</p>
+          <h1 class="text-2xl font-bold tracking-tight text-on-surface dark:text-white">Manajemen Corporate Highlights</h1>
+          <p class="text-sm text-on-surface-variant dark:text-surface-variant">Kelola pengumuman penting (highlights) yang muncul di sidebar dashboard.</p>
         </div>
 
         <button
@@ -132,15 +132,15 @@ const destroyHighlight = (id: number) => {
         </div>
       </div>
 
-      <div class="rounded-xl border border-outline-variant bg-surface-container-lowest text-on-surface shadow-sm overflow-hidden">
+      <div class="rounded-xl border border bg-surface-container-lowest text-on-surface shadow-sm overflow-hidden">
         <div class="relative w-full overflow-auto">
           <table class="w-full caption-bottom text-sm border-collapse">
-            <thead class="bg-surface-container border-b border-outline-variant">
-              <tr>
-                <th class="h-12 px-4 text-left align-middle font-semibold text-on-surface-variant">Judul Highlight</th>
-                <th class="h-12 px-4 text-left align-middle font-semibold text-on-surface-variant">Keterangan / Info</th>
-                <th class="h-12 px-4 text-left align-middle font-semibold text-on-surface-variant">Link (Tautan)</th>
-                <th class="h-12 px-4 text-right align-middle font-semibold text-on-surface-variant">Aksi</th>
+            <thead class="bg-surface-container border-b border">
+              <tr class="bg-card">
+                <th class="h-12 px-4 text-left align-middle font-semibold text-on-surface-variant dark:text-white">Judul Highlight</th>
+                <th class="h-12 px-4 text-left align-middle font-semibold text-on-surface-variant dark:text-white">Keterangan / Info</th>
+                <th class="h-12 px-4 text-left align-middle font-semibold text-on-surface-variant dark:text-white">Link (Tautan)</th>
+                <th class="h-12 px-4 text-right align-middle font-semibold text-on-surface-variant dark:text-white">Aksi</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-outline-variant">
@@ -177,7 +177,7 @@ const destroyHighlight = (id: number) => {
                 </td>
               </tr>
               <tr v-if="!highlights.data.length">
-                <td colspan="4" class="p-8 text-center text-on-surface-variant select-none">
+                <td colspan="4" class="p-8 text-center text-on-surface-variant select-none bg-card dark:text-white">
                   Tidak ada corporate highlights ditemukan.
                 </td>
               </tr>
@@ -200,7 +200,7 @@ const destroyHighlight = (id: number) => {
             <Link
               v-else
               :href="link.url"
-              preserve-state 
+              preserve-state
               preserve-scroll
               class="px-3 py-1.5 text-sm rounded-lg border transition-colors cursor-pointer"
               :class="link.active

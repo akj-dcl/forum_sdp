@@ -12,4 +12,8 @@ class Upt extends Model
     {
         return $this->belongsTo(Kanwil::class);
     }
+    public function users()
+    {
+        return $this->hasMany(User::class);
+    }
 }

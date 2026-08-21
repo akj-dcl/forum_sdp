@@ -13,22 +13,6 @@ class DashboardController extends Controller
 {
     public function index(Request $request)
     {
-        $pinnedPosts = Post::with('channel')
-            ->where('is_pinned', true)
-            ->get();
-
-        $hasMarkedData = $pinnedPosts->isNotEmpty();
-
-        $markedMessage = null;
-        if ($hasMarkedData) {
-            $channelNames = $pinnedPosts->map(function ($post) {
-                return $post->channel?->name ?? 'General Feed';
-            })->unique();
-
-            $channelsList = $channelNames->join(', ', ' dan ');
-            $markedMessage = "Perhatian: Ada postingan yang disematkan di channel " . $channelsList . "!";
-        }
-
         $channels = Channel::orderBy('name')->get();
 
         $channelSlug = $request->query('channel');
@@ -47,7 +31,6 @@ class DashboardController extends Controller
             ->when($activeChannel, function ($query) use ($activeChannel) {
                 $query->where('channel_id', $activeChannel->id);
             })
-            ->orderBy('is_pinned', 'desc')
             ->latest()
             ->get()
             ->map(function ($post) {
@@ -61,7 +44,6 @@ class DashboardController extends Controller
 
                 return [
                     'id' => $post->id,
-                    'is_pinned' => (bool) $post->is_pinned,
                     'content' => $post->content,
                     'time' => $post->created_at->diffForHumans(),
                     'category' => $post->channel?->name ?? 'General Feed',
@@ -127,12 +109,9 @@ class DashboardController extends Controller
             'channels' => $channels,
             'directoryUsers' => $directoryUsers,
             'activeChannel' => $activeChannel,
-            'highlights' => $highlights,
-            'hasMarkedData' => $hasMarkedData,
-            'markedMessage' => $markedMessage
+            'highlights' => $highlights
         ]);
     }
-
     public function togglePin(Post $post)
     {
         $post->update([

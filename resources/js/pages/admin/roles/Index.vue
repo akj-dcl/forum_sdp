@@ -34,11 +34,11 @@ watch(
   debounce((newSearch: string) => {
     const params = new URLSearchParams();
     if (newSearch) params.append('search', newSearch);
-    
+
     router.get(window.location.pathname, Object.fromEntries(params), {
       preserveState: true,
       preserveScroll: true,
-      replace: true 
+      replace: true
     });
   }, 300)
 )
@@ -53,7 +53,7 @@ function destroyRole(id: number) {
   <Head title="Master Role" />
 
   <AppLayout>
-    <div class="flex h-full flex-1 flex-col gap-4 p-4 md:p-6 bg-background text-foreground">
+    <div class="flex h-full flex-1 flex-col gap-4 p-4 md:p-6 bg-background text-foreground dark:bg-inverse-surface">
 
       <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
@@ -114,7 +114,7 @@ function destroyRole(id: number) {
                     <span v-if="!role.permissions.length" class="text-muted-foreground text-xs italic">
                       - Belum ada akses -
                     </span>
-                    
+
                   </div>
                 </td>
                 <td class="p-4 text-right align-middle">
@@ -162,12 +162,12 @@ function destroyRole(id: number) {
             <Link
               v-else
               :href="link.url"
-              preserve-state 
+              preserve-state
               preserve-scroll
               class="px-3 py-1 text-sm rounded-md border transition-colors"
               :class="link.active
                 ? 'bg-primary text-primary-foreground border-primary'
-                : 'border-border bg-background hover:bg-accent hover:text-accent-foreground'"
+                : 'border-border bg-background hover:bg-accent hover:text-accent-foreground bg-card'"
               v-html="link.label"
             />
           </template>

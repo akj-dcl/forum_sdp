@@ -163,11 +163,11 @@ class PostController extends Controller
             if ($post->attachment_path && !str_starts_with($post->attachment_path, 'http')) {
                 \Storage::disk('public')->delete($post->attachment_path);
             }
-            
+
             $file = $request->file('attachment');
             $attachmentPath = $file->store('attachments', 'public');
             $attachmentName = $file->getClientOriginalName();
-            
+
             $bytes = $file->getSize();
             if ($bytes >= 1073741824) {
                 $attachmentSize = number_format($bytes / 1073741824, 1) . ' GB';
@@ -235,14 +235,24 @@ class PostController extends Controller
 
     public function destroyComment(Comment $comment)
     {
-        if (auth()->id() !== $comment->user_id && 
-            auth()->id() !== $comment->post->user_id && 
-            !auth()->user()->hasRole('Super Admin')) {
+        if (
+            auth()->id() !== $comment->user_id &&
+            auth()->id() !== $comment->post->user_id &&
+            !auth()->user()->hasRole('Super Admin')
+        ) {
             abort(403);
         }
 
         $comment->delete();
 
         return redirect()->back();
+    }
+    public function togglePin(Post $post)
+    {
+        $post->update([
+            'is_pinned' => !$post->is_pinned,
+        ]);
+
+        return back();
     }
 }

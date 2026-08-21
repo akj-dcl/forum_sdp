@@ -22,8 +22,14 @@ class DataAkunController extends Controller
             })
             ->when($request->search, function ($query, $search) {
                 $query->where('name', 'like', "%{$search}%")
-                      ->orWhere('nip', 'like', "%{$search}%")
-                      ->orWhere('username', 'like', "%{$search}%");
+                    ->orWhere('nip', 'like', "%{$search}%")
+                    ->orWhere('username', 'like', "%{$search}%")
+                    ->orWhereHas('upt', function ($query) use ($search) {
+                        $query->where('name', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('kanwil', function ($query) use ($search) {
+                        $query->where('name', 'like', "%{$search}%");
+                    });
             })
             ->latest()
             ->paginate(10)
@@ -39,7 +45,7 @@ class DataAkunController extends Controller
     {
         $roles = Role::where('name', '!=', 'Pengunjung')->get();
         $kanwils = Kanwil::where('is_active', true)->orderBy('name')->get();
-        $upts = Upt::where('is_active', true)->orderBy('name')->get(); 
+        $upts = Upt::where('is_active', true)->orderBy('name')->get();
         $jenisGolongans = JenisGolongan::orderBy('nama_golongan')->get();
 
         return Inertia::render('admin/datamaster/dataakun/Create', [
@@ -67,7 +73,7 @@ class DataAkunController extends Controller
         $user = User::create([
             'name' => $request->name,
             'nip' => $request->nip,
-            'username' => $request->nip, 
+            'username' => $request->nip,
             'jabatan' => $request->jabatan,
             'upt_id' => $request->upt_id,
             'kanwil_id' => $request->kanwil_id,
@@ -79,9 +85,9 @@ class DataAkunController extends Controller
 
         return redirect()->route('data-akun.index')->with('success', 'Akun pegawai berhasil dibuat.');
     }
-    public function edit($id) 
+    public function edit($id)
     {
-        $user = User::findOrFail($id); 
+        $user = User::findOrFail($id);
 
         $user->load(['roles', 'upt', 'kanwil']);
         $roles = Role::where('name', '!=', 'Pengunjung')->get();
@@ -118,7 +124,7 @@ class DataAkunController extends Controller
         $user->update([
             'name' => $request->name,
             'nip' => $request->nip,
-            'username' => $request->nip, 
+            'username' => $request->nip,
             'jabatan' => $request->jabatan,
             'upt_id' => $request->upt_id,
             'kanwil_id' => $request->kanwil_id,
@@ -137,7 +143,7 @@ class DataAkunController extends Controller
     public function destroy($id)
     {
         $user = User::findOrFail($id);
-        
+
         $user->delete();
         return redirect()->route('data-akun.index')->with('success', 'Akun berhasil dihapus.');
     }

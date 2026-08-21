@@ -24,7 +24,6 @@ Route::get('/test-kanwil', function (SdpMasterService $sdp) {
     return response()->json(
         $sdp->getKanwil()
     );
-
 });
 
 Route::get('/test-upt', function (SdpMasterService $sdp) {
@@ -32,7 +31,6 @@ Route::get('/test-upt', function (SdpMasterService $sdp) {
     return response()->json(
         $sdp->getUpt()
     );
-
 });
 
 // Route::get('/test-kanwil', function (WsoApiService $api) {
@@ -59,6 +57,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
     Route::post('posts/{post}/react', [PostController::class, 'toggleReaction'])->name('posts.react');
     Route::post('posts/{post}/comments', [PostController::class, 'storeComment'])->name('posts.comments.store');
+    Route::post('/posts/{post}/pin', [PostController::class, 'togglePin'])->name('posts.pin');
     Route::put('comments/{comment}', [PostController::class, 'updateComment'])->name('comments.update');
     Route::delete('comments/{comment}', [PostController::class, 'destroyComment'])->name('comments.destroy');
 
@@ -84,8 +83,6 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
     Route::resource('jenis-golongans', JenisGolonganController::class);
     Route::resource('channels', ChannelController::class);
     Route::resource('corporate-highlights', CorporateHighlightController::class)->names('corporate-highlights');
-    
-
 });
 
 require __DIR__ . '/settings.php';

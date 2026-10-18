@@ -10,6 +10,7 @@ class MasterSurvei extends Model
 
     protected $fillable = [
         'user_id',
+        'channel_id',
         'judul',
         'deskripsi',
         'batas_pengisian',
@@ -18,6 +19,11 @@ class MasterSurvei extends Model
         'target_roles',
         'is_active',
     ];
+
+    public function channel()
+    {
+        return $this->belongsTo(Channel::class);
+    }
 
     protected $casts = [
         'tanggal_mulai' => 'date',

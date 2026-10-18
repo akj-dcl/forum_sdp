@@ -231,16 +231,6 @@ onBeforeUnmount(() => {
                     <span v-if="!isSidebarCollapsed" class="font-label-md text-label-md">Direct Messages</span>
                 </Link>
 
-                <Link :class="[
-                    'flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200',
-                    isSidebarCollapsed ? 'justify-center px-0 w-10 h-10 mx-auto' : '',
-                    isActive('/survei') ? 'bg-primary text-on-primary font-bold shadow-sm' : 'text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-high dark:hover:bg-surface-dim'
-                ]" href="/survei" :title="isSidebarCollapsed ? 'Survei' : ''">
-                    <span class="material-symbols-outlined" :style="isActive('/survei') ? 'font-variation-settings: \'FILL\' 1;' : ''">assignment</span>
-                    <span v-if="!isSidebarCollapsed" class="font-label-md text-label-md">Survei</span>
-                </Link>
-
-                <!-- Dynamic Navigation depending on roles -->
                 <Link v-if="hasRole('Super Admin') || hasRole('Admin Kanwil')" :class="[
                     'flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200',
                     isSidebarCollapsed ? 'justify-center px-0 w-10 h-10 mx-auto' : '',

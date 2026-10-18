@@ -19,7 +19,6 @@ use App\Http\Controllers\Admin\CorporateHighlightController;
 use App\Services\WsoApiService;
 use App\Services\SdpMasterService;
 use App\Http\Controllers\SurveiController;
-use App\Http\Controllers\SurveiLayananController;
 use App\Http\Controllers\Admin\MasterSurveiController;
 
 
@@ -74,11 +73,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('api/direct-messages/history/{user}', [DirectMessageController::class, 'getHistory']);
     Route::post('api/direct-messages/send', [DirectMessageController::class, 'sendMessage']);
     Route::post('api/direct-messages/read/{sender}', [DirectMessageController::class, 'markAsRead']);
-    Route::get('survei-layanan', [SurveiLayananController::class, 'create'])->name('survei-layanan.create');
-    Route::post('survei-layanan', [SurveiLayananController::class, 'store'])->name('survei-layanan.store');
 
     //survey
-    Route::get('survei', [SurveiController::class, 'index'])->name('survei.index');
+    Route::get('survei/{id}', [SurveiController::class, 'show'])->name('survei.show');
     Route::post('survei/{id}', [SurveiController::class, 'store'])->name('survei.store');
     Route::post('survei/{id}/update', [SurveiController::class, 'update'])->name('survei.update');
 });

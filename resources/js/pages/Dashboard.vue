@@ -10,6 +10,7 @@ const props = defineProps<{
     directoryUsers: any[];
     activeChannel: any | null;
     highlights: any[];
+    activeSurveis: any[];
 }>();
 
 const page = usePage();
@@ -33,7 +34,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 const searchColleagueQuery = ref('');
 
 const filteredColleagues = computed(() => {
-    return props.directoryUsers.filter(c => 
+    return props.directoryUsers.filter(c =>
         c.name.toLowerCase().includes(searchColleagueQuery.value.toLowerCase()) ||
         (c.role && c.role.toLowerCase().includes(searchColleagueQuery.value.toLowerCase()))
     );
@@ -75,7 +76,7 @@ const selectAttachmentType = (type: 'image' | 'video' | 'audio' | 'file' | 'link
         else if (type === 'video') fileAccept.value = 'video/*';
         else if (type === 'audio') fileAccept.value = 'audio/*';
         else fileAccept.value = '*/*';
-        
+
         setTimeout(() => {
             triggerFileInput();
         }, 100);
@@ -90,7 +91,7 @@ const handleFileChange = (e: Event) => {
         attachmentName.value = file.name;
         removeLink();
         removeSticker();
-        
+
         if (file.type.startsWith('image/')) {
             attachmentPreviewUrl.value = URL.createObjectURL(file);
         } else {
@@ -154,7 +155,7 @@ const emojiPickerContainer = ref<HTMLElement | null>(null);
 
 const handleClickOutside = (event: MouseEvent) => {
     const target = event.target as HTMLElement;
-    
+
     if (attachmentContainer.value && !attachmentContainer.value.contains(target)) {
         showAttachmentDropdown.value = false;
     }
@@ -162,17 +163,17 @@ const handleClickOutside = (event: MouseEvent) => {
     if (emojiPickerContainer.value && !emojiPickerContainer.value.contains(target)) {
         showPostEmojiPicker.value = false;
     }
-    
+
     const isInsideEditAttachment = target.closest('.edit-attachment-container');
     if (!isInsideEditAttachment) {
         editForm.value.showAttachmentDropdown = false;
     }
-    
+
     const isInsideEditEmoji = target.closest('.edit-emoji-picker-container');
     if (!isInsideEditEmoji) {
         editForm.value.showPostEmojiPicker = false;
     }
-    
+
     const isInsideCommentPicker = target.closest('.comment-emoji-picker-container');
     if (!isInsideCommentPicker) {
         activeCommentEmojiPickerPostId.value = null;
@@ -182,7 +183,7 @@ const handleClickOutside = (event: MouseEvent) => {
 onMounted(() => {
     window.addEventListener('focus-post-textarea', handleFocusTextarea);
     document.addEventListener('click', handleClickOutside);
-    
+
     const params = new URLSearchParams(window.location.search);
     if (params.get('create') === 'true') {
         focusPostTextarea();
@@ -274,14 +275,14 @@ const handleSelectCommentSticker = (postId: number, sticker: { url: string; name
 
 const parseComment = (content: string) => {
     if (!content) return { text: '', mediaUrl: null, mediaType: null, firstUrl: null };
-    
+
     const mediaRegex = /\[(Sticker|GIF):\s*([^\]]+)\]\((https?:\/\/[^\)]+)\)/i;
     const mediaMatch = content.match(mediaRegex);
-    
+
     let text = content;
     let mediaUrl = null;
     let mediaType = null;
-    
+
     if (mediaMatch) {
         text = content.replace(mediaRegex, '').trim();
         mediaType = mediaMatch[1].toLowerCase();
@@ -369,7 +370,7 @@ const selectEditAttachmentType = (type: 'image' | 'video' | 'audio' | 'file' | '
         else if (type === 'video') editForm.value.fileAccept = 'video/*';
         else if (type === 'audio') editForm.value.fileAccept = 'audio/*';
         else editForm.value.fileAccept = '*/*';
-        
+
         setTimeout(() => {
             editFileInput.value?.click();
         }, 100);
@@ -386,7 +387,7 @@ const handleEditFileChange = (e: Event) => {
         editForm.value.hasOriginalAttachment = false;
         removeEditLink();
         removeEditSticker();
-        
+
         if (file.type.startsWith('image/')) {
             editForm.value.attachmentPreviewUrl = URL.createObjectURL(file);
         } else {
@@ -520,7 +521,7 @@ const deleteComment = (commentId: number) => {
                         </div>
                         <div class="flex-1 flex flex-col gap-3">
                             <textarea ref="postTextarea" v-model="form.content" class="w-full bg-transparent border-none resize-none font-body-lg text-body-lg text-on-surface placeholder-outline focus:ring-0 p-0 h-12 focus:outline-none" placeholder="Share an update, broadcast an announcement, or ask a question..." rows="2"></textarea>
-                            
+
                             <!-- Link Input Fields -->
                             <div v-if="showLinkInput" class="flex flex-col gap-2 bg-surface-container-low rounded-xl p-3 border border-outline-variant">
                                 <div class="flex items-center justify-between">
@@ -587,7 +588,7 @@ const deleteComment = (commentId: number) => {
                                         <button @click="showAttachmentDropdown = !showAttachmentDropdown; if (showAttachmentDropdown) showPostEmojiPicker = false;" type="button" class="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container-low rounded-full transition-colors flex items-center justify-center cursor-pointer border-none bg-transparent" title="Tambah Lampiran">
                                             <span class="material-symbols-outlined text-[20px]">attach_file</span>
                                         </button>
-                                        
+
                                         <div v-if="showAttachmentDropdown" class="absolute left-0 top-11 w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl py-2 z-50 flex flex-col">
                                             <button @click="selectAttachmentType('image')" type="button" class="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-100 dark:hover:bg-slate-800 border-none bg-transparent text-left text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer w-full">
                                                 <span class="material-symbols-outlined text-[18px] text-blue-500">image</span>
@@ -617,9 +618,9 @@ const deleteComment = (commentId: number) => {
                                         <button @click="showPostEmojiPicker = !showPostEmojiPicker; if (showPostEmojiPicker) showAttachmentDropdown = false;" type="button" class="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container-low rounded-full transition-colors flex items-center justify-center cursor-pointer border-none bg-transparent" title="Pilih Emoji/Stiker">
                                             <span class="material-symbols-outlined text-[20px]">sentiment_satisfied</span>
                                         </button>
-                                        
+
                                         <div v-if="showPostEmojiPicker" class="absolute left-0 top-11 z-50">
-                                            <EmojiStickerPicker 
+                                            <EmojiStickerPicker
                                                 @select-emoji="handleSelectPostEmoji"
                                                 @select-gif="handleSelectPostGif"
                                                 @select-sticker="handleSelectPostSticker"
@@ -627,7 +628,7 @@ const deleteComment = (commentId: number) => {
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <div class="flex items-center gap-2">
                                     <!-- Channel Selector (only when not in specific channel view) -->
                                     <select v-if="!activeChannel" v-model="form.channel_id" class="text-xs bg-surface-container border border-outline rounded px-2 py-1 text-on-surface focus:outline-none max-w-[150px]">
@@ -686,7 +687,7 @@ const deleteComment = (commentId: number) => {
                             </button>
                         </div>
                     </div>
-                    
+
                     <!-- Body -->
                     <div v-if="editingPostId === post.id" class="flex flex-col gap-3 bg-surface-container-lowest border border-outline-variant p-4 rounded-xl shadow-xs">
                         <textarea v-model="editForm.content" class="w-full bg-surface-container-low border border-outline-variant rounded-lg p-3 font-body-lg text-body-lg text-on-surface focus:outline-none focus:ring-1 focus:ring-primary" rows="3" placeholder="Apa yang ingin Anda bagikan?"></textarea>
@@ -761,7 +762,7 @@ const deleteComment = (commentId: number) => {
                                     <button @click="editForm.showAttachmentDropdown = !editForm.showAttachmentDropdown; if (editForm.showAttachmentDropdown) editForm.showPostEmojiPicker = false;" type="button" class="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container-low rounded-full transition-colors flex items-center justify-center cursor-pointer border-none bg-transparent" title="Tambah/Ganti Lampiran">
                                         <span class="material-symbols-outlined text-[20px]">attach_file</span>
                                     </button>
-                                    
+
                                     <div v-if="editForm.showAttachmentDropdown" class="absolute left-0 top-11 w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl py-2 z-50 flex flex-col">
                                         <button @click="selectEditAttachmentType('image')" type="button" class="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-100 dark:hover:bg-slate-800 border-none bg-transparent text-left text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer w-full">
                                             <span class="material-symbols-outlined text-[18px] text-blue-500">image</span>
@@ -791,9 +792,9 @@ const deleteComment = (commentId: number) => {
                                     <button @click="editForm.showPostEmojiPicker = !editForm.showPostEmojiPicker; if (editForm.showPostEmojiPicker) editForm.showAttachmentDropdown = false;" type="button" class="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container-low rounded-full transition-colors flex items-center justify-center cursor-pointer border-none bg-transparent" title="Pilih Emoji/Stiker">
                                         <span class="material-symbols-outlined text-[20px]">sentiment_satisfied</span>
                                     </button>
-                                    
+
                                     <div v-if="editForm.showPostEmojiPicker" class="absolute left-0 top-11 z-50">
-                                        <EmojiStickerPicker 
+                                        <EmojiStickerPicker
                                             @select-emoji="handleSelectEditPostEmoji"
                                             @select-gif="handleSelectEditPostGif"
                                             @select-sticker="handleSelectEditPostSticker"
@@ -813,7 +814,7 @@ const deleteComment = (commentId: number) => {
                         </div>
                     </div>
                     <div v-else class="font-body-lg text-body-lg text-on-surface leading-relaxed whitespace-pre-wrap" v-html="linkify(post.content)"></div>
-                    
+
                     <!-- Attachment -->
                     <div v-if="post.attachment" class="mt-2">
                         <!-- Image Attachment -->
@@ -822,7 +823,7 @@ const deleteComment = (commentId: number) => {
                                 <img :src="post.attachment.path" alt="Image attachment" class="rounded-lg max-h-[400px] w-auto object-contain border border-outline-variant hover:opacity-95 transition-opacity" />
                             </a>
                         </div>
-                        
+
                         <!-- Video Attachment -->
                         <div v-else-if="post.attachment.type === 'video'" class="mb-2">
                             <video :src="post.attachment.path" controls class="rounded-lg max-h-[400px] w-full bg-black border border-outline-variant"></video>
@@ -848,7 +849,7 @@ const deleteComment = (commentId: number) => {
                                 </div>
                             </a>
                         </div>
-                        
+
                         <!-- General File Card -->
                         <a v-else :href="post.attachment.path" download class="border border-outline-variant rounded-lg p-3 flex items-center gap-4 bg-surface-container-low hover:bg-surface-container-high transition-colors cursor-pointer text-inherit block no-underline">
                             <div class="w-12 h-12 bg-primary-container rounded flex items-center justify-center shrink-0">
@@ -863,7 +864,7 @@ const deleteComment = (commentId: number) => {
                             </div>
                         </a>
                     </div>
-                    
+
                     <!-- Footer / Engagement -->
                     <div class="pt-3 border-t border-outline-variant flex items-center gap-6 mt-1">
                         <button @click="toggleReaction(post.id, 'like')" :class="['flex items-center gap-1.5 transition-colors group cursor-pointer border-none bg-transparent', post.liked ? 'text-primary font-bold animate-pulse' : 'text-on-surface-variant hover:text-primary']">
@@ -901,7 +902,7 @@ const deleteComment = (commentId: number) => {
                                         </button>
                                     </div>
                                 </div>
-                                
+
                                 <div v-if="editingCommentId === comment.id" class="flex gap-2 mt-1">
                                     <input v-model="editingCommentContent" @keyup.enter="saveEditComment(comment.id)" type="text" class="flex-1 bg-surface-container-lowest border border-outline focus:border-primary rounded-lg px-2 py-1 text-xs text-on-surface focus:outline-none" />
                                     <button @click="cancelEditComment" class="bg-surface-container border border-outline text-on-surface font-label-sm px-2 py-1 rounded-md text-[10px] cursor-pointer">Cancel</button>
@@ -909,14 +910,14 @@ const deleteComment = (commentId: number) => {
                                 </div>
                                 <div v-else class="flex flex-col gap-2">
                                     <p class="font-body-md text-body-md text-on-surface leading-relaxed whitespace-pre-wrap" v-html="linkify(parseComment(comment.content).text)"></p>
-                                    
+
                                     <div v-if="parseComment(comment.content).mediaUrl" class="mt-1 select-none">
-                                        <img :src="parseComment(comment.content).mediaUrl" :alt="parseComment(comment.content).mediaType" 
+                                        <img :src="parseComment(comment.content).mediaUrl" :alt="parseComment(comment.content).mediaType"
                                              :class="[
                                                  parseComment(comment.content).mediaType === 'sticker' ? 'w-24 h-24 object-contain' : 'rounded-lg max-h-[160px] w-auto object-contain border border-slate-200 dark:border-slate-800'
                                              ]" />
                                     </div>
-                                    
+
                                     <div v-if="parseComment(comment.content).firstUrl" class="mt-1">
                                         <a :href="parseComment(comment.content).firstUrl" target="_blank" class="border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 flex items-center gap-3 bg-white dark:bg-slate-950 hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors cursor-pointer text-inherit no-underline shadow-xs max-w-md">
                                             <span class="material-symbols-outlined text-[18px] text-indigo-500 shrink-0">link</span>
@@ -934,14 +935,14 @@ const deleteComment = (commentId: number) => {
                             </div>
                             <div class="flex-1 flex gap-2 items-center relative">
                                 <input v-model="commentInputs[post.id]" @keyup.enter="handleAddComment(post.id)" type="text" class="flex-1 bg-surface-container-low border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary rounded-lg py-1.5 px-3 font-body-md text-body-md text-on-surface placeholder-outline focus:outline-none transition-all" placeholder="Write a comment..." />
-                                
+
                                 <div class="relative shrink-0 select-none comment-emoji-picker-container">
                                     <button @click="toggleCommentEmojiPicker(post.id)" type="button" class="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container-low rounded-full transition-colors flex items-center justify-center cursor-pointer border-none bg-transparent" title="Pilih Emoji/Stiker">
                                         <span class="material-symbols-outlined text-[20px]">sentiment_satisfied</span>
                                     </button>
-                                    
+
                                     <div v-if="activeCommentEmojiPickerPostId === post.id" class="absolute right-0 top-11 z-50">
-                                        <EmojiStickerPicker 
+                                        <EmojiStickerPicker
                                             @select-emoji="(emoji) => handleSelectCommentEmoji(post.id, emoji)"
                                             @select-gif="(gif) => handleSelectCommentGif(post.id, gif)"
                                             @select-sticker="(sticker) => handleSelectCommentSticker(post.id, sticker)"
@@ -991,24 +992,44 @@ const deleteComment = (commentId: number) => {
                     </div>
                 </div>
 
-                <div class="bg-surface-container-low border border-outline-variant rounded-xl p-5">
-                    <h3 class="font-label-md text-label-md text-outline uppercase tracking-wider mb-4 select-none">Papan Pengumuman</h3>
+                    <h3 class="font-label-md text-label-md text-outline uppercase tracking-wider mb-4 select-none">
+                        Survei Channel Aktif
+                    </h3>
                     <ul class="flex flex-col gap-3">
-                        <li v-for="highlight in highlights" :key="highlight.id">
-                            <a v-if="highlight.link && highlight.link !== '#'" :href="highlight.link" target="_blank" class="group block no-underline text-inherit">
-                                <p class="font-label-md text-label-md text-on-surface font-semibold group-hover:text-primary transition-colors">{{ highlight.title }}</p>
-                                <p class="font-label-sm text-label-sm text-on-surface-variant select-none">{{ highlight.description }}</p>
-                            </a>
-                            <div v-else class="block">
-                                <p class="font-label-md text-label-md text-on-surface font-semibold">{{ highlight.title }}</p>
-                                <p class="font-label-sm text-label-sm text-on-surface-variant select-none">{{ highlight.description }}</p>
+                        <li v-for="s in activeSurveis" :key="s.id" class="border border-outline-variant rounded-xl p-3 bg-surface-container-lowest shadow-sm flex flex-col">
+                            <div class="flex justify-between items-start mb-1.5">
+                                <span :class="['text-[9px] font-bold px-2 py-0.5 rounded-full select-none', s.sudah_diisi ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' : 'bg-primary/10 text-primary border border-primary/20']">
+                                    {{ s.sudah_diisi ? '✓ Sudah Diisi' : 'Belum Diisi' }}
+                                </span>
+                                <span v-if="s.tanggal_selesai" class="text-[9px] text-outline font-medium">s/d {{ s.tanggal_selesai }}</span>
                             </div>
-                        </li>
-                        <li v-if="highlights.length === 0" class="text-center py-4 text-on-surface-variant text-xs select-none">
-                            No corporate highlights available.
+                            <p class="font-label-md text-on-surface font-semibold line-clamp-2 leading-snug mb-2.5">{{ s.judul }}</p>
+
+                            <!-- Jika survei berkali-kali & sudah pernah diisi -->
+            <div v-if="s.batas_pengisian === 'berkali_kali' && s.sudah_diisi" class="flex flex-col gap-2 mt-1">
+                <Link :href="`/survei/${s.id}?action=new`" class="w-full inline-flex justify-center items-center gap-1.5 py-1.5 rounded-lg text-xs font-bold transition-colors no-underline cursor-pointer border-none shadow-xs bg-primary hover:bg-on-primary-fixed-variant text-on-primary">
+                    <span class="material-symbols-outlined text-[16px]">add</span>
+                    Jawaban Baru
+                </Link>
+                <Link :href="`/survei/${s.id}?action=edit`" class="w-full inline-flex justify-center items-center gap-1.5 py-1.5 rounded-lg text-xs font-bold transition-colors no-underline cursor-pointer border-none shadow-xs bg-surface-container-high hover:bg-surface-variant text-on-surface">
+                    <span class="material-symbols-outlined text-[16px]">edit_note</span>
+                    Edit Jawaban Terakhir
+                </Link>
+            </div>
+
+            <!-- Jika survei sekali isi ATAU belum pernah diisi sama sekali -->
+            <div v-else class="mt-1">
+                <Link :href="`/survei/${s.id}`" :class="[
+                    'w-full inline-flex justify-center items-center gap-1.5 py-1.5 rounded-lg text-xs font-bold transition-colors no-underline cursor-pointer border-none shadow-xs',
+                    s.sudah_diisi ? 'bg-surface-container-high hover:bg-surface-variant text-on-surface' : 'bg-primary hover:bg-on-primary-fixed-variant text-on-primary'
+                ]">
+                    <span class="material-symbols-outlined text-[16px]">{{ s.sudah_diisi ? 'edit_note' : 'play_arrow' }}</span>
+                    {{ s.sudah_diisi ? 'Lihat / Edit Jawaban' : 'Isi Survei' }}
+                </Link>
+            </div>
                         </li>
                     </ul>
-                </div>
+
             </div>
         </div>
     </AppLayout>

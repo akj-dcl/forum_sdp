@@ -6,6 +6,8 @@ use App\Models\Channel;
 use App\Models\Post;
 use App\Models\User;
 use App\Models\CorporateHighlight;
+use App\Models\MasterSurvei;
+use App\Models\ResponSurvei;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -22,12 +24,12 @@ class DashboardController extends Controller
         }
 
         $posts = Post::with([
-                'user.upt', 
-                'user.kanwil', 
-                'channel', 
-                'comments.user', 
-                'reactions'
-            ])
+            'user.upt',
+            'user.kanwil',
+            'channel',
+            'comments.user',
+            'reactions'
+        ])
             ->when($activeChannel, function ($query) use ($activeChannel) {
                 $query->where('channel_id', $activeChannel->id);
             })
@@ -35,13 +37,13 @@ class DashboardController extends Controller
             ->get()
             ->map(function ($post) {
                 $userId = auth()->id();
-                
+
                 $likesCount = $post->reactions->where('type', 'like')->count();
                 $bulbsCount = $post->reactions->where('type', 'bulb')->count();
 
                 $userLiked = $post->reactions->where('user_id', $userId)->where('type', 'like')->isNotEmpty();
                 $userBulbed = $post->reactions->where('user_id', $userId)->where('type', 'bulb')->isNotEmpty();
-                
+
                 return [
                     'id' => $post->id,
                     'content' => $post->content,
@@ -104,12 +106,46 @@ class DashboardController extends Controller
             ];
         });
 
+        $channelId = $activeChannel ? $activeChannel->id : null;
+        $user = auth()->user();
+        $userRoles = $user->getRoleNames()->toArray();
+        $today = now()->toDateString();
+
+        $activeSurveis = MasterSurvei::where('channel_id', $channelId)
+            ->where('is_active', true)
+            ->where(function ($q) use ($today) {
+                $q->whereNull('tanggal_mulai')->orWhere('tanggal_mulai', '<=', $today);
+            })
+            ->where(function ($q) use ($today) {
+                $q->whereNull('tanggal_selesai')->orWhere('tanggal_selesai', '>=', $today);
+            })
+            ->get()
+            ->filter(function ($survei) use ($userRoles) {
+                if (empty($survei->target_roles)) return true;
+                return count(array_intersect($userRoles, $survei->target_roles)) > 0;
+            })
+            ->map(function ($survei) use ($user) {
+                // Cek apakah user sudah mengisi
+                $respon = ResponSurvei::where('survei_id', $survei->id)
+                    ->where('user_id', $user->id)
+                    ->latest()
+                    ->first();
+                return [
+                    'id' => $survei->id,
+                    'judul' => $survei->judul,
+                    'batas_pengisian' => $survei->batas_pengisian, // <-- TAMBAHKAN BARIS INI
+                    'sudah_diisi' => $respon !== null,
+                    'tanggal_selesai' => $survei->tanggal_selesai?->format('d M Y'),
+                ];
+            })->values();
+
         return Inertia::render('Dashboard', [
             'posts' => $posts,
             'channels' => $channels,
             'directoryUsers' => $directoryUsers,
             'activeChannel' => $activeChannel,
-            'highlights' => $highlights
+            'highlights' => $highlights,
+            'activeSurveis' => $activeSurveis,
         ]);
     }
 }

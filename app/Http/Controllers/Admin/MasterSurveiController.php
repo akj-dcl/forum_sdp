@@ -9,6 +9,7 @@ use App\Models\ResponSurvei;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use App\Models\Channel;
 use Spatie\Permission\Models\Role;
 
 class MasterSurveiController extends Controller
@@ -33,9 +34,11 @@ class MasterSurveiController extends Controller
     public function create()
     {
         $roles = Role::pluck('name')->toArray();
+        $channels = Channel::orderBy('name')->get();
 
         return Inertia::render('admin/datamaster/survei/Create', [
             'roles' => $roles,
+            'channels' => $channels,
         ]);
     }
 
@@ -43,6 +46,7 @@ class MasterSurveiController extends Controller
     {
         $request->validate([
             'judul' => 'required|string|max:255',
+            'channel_id' => 'nullable|exists:channels,id',
             'deskripsi' => 'nullable|string',
             'batas_pengisian' => 'required|in:sekali,berkali_kali',
             'tanggal_mulai' => 'nullable|date',
@@ -58,6 +62,7 @@ class MasterSurveiController extends Controller
         DB::transaction(function () use ($request) {
             $survei = MasterSurvei::create([
                 'user_id' => auth()->id(),
+                'channel_id' => $request->channel_id,
                 'judul' => $request->judul,
                 'deskripsi' => $request->deskripsi,
                 'batas_pengisian' => $request->batas_pengisian,

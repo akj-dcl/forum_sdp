@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import { Head, useForm, usePage } from '@inertiajs/vue3';
+import { ref, computed, onMounted } from 'vue';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
-import { ref, computed } from 'vue';
 import type { BreadcrumbItem } from '@/types';
 
 type OptionItem = {
@@ -14,7 +14,7 @@ type Question = {
     id: number;
     teks_pertanyaan: string;
     tipe_jawaban: 'teks' | 'pilihan' | 'angka' | 'foto';
-    opsi_pilihan: any[]; // Bisa string biasa atau OptionItem objek
+    opsi_pilihan: any[];
     wajib_diisi: boolean;
     urutan: number;
 };
@@ -53,9 +53,10 @@ const activeSurvei = ref<SurveyItem | null>(null);
 
 // State Pertanyaan Satu-per-Satu & Riwayat Lompatan
 const currentQuestionIndex = ref<number>(0);
-const questionHistory = ref<number[]>([0]); // Menyimpan jejak indeks soal yang dilewati
-const skippedQuestionIds = ref<number[]>([]); // Menyimpan ID soal yang sengaja di-skip
+const questionHistory = ref<number[]>([0]);
+const skippedQuestionIds = ref<number[]>([]);
 
+// Form State
 const form = useForm({
     jawaban: {} as Record<string, any>,
     jawaban_foto: {} as Record<string, File>,
@@ -64,23 +65,40 @@ const form = useForm({
 
 const photoPreviews = ref<Record<string, string>>({});
 
-// Buka Survei
-const bukaSurvei = (s: SurveyItem) => {
-    activeSurvei.value = s;
+// OTOMATIS BUKA FORM JIKA DIAKSES DARI DASHBOARD (HANYA 1 SURVEI)
+onMounted(() => {
+    if (props.surveis.length === 1) {
+        const single = props.surveis[0];
+        bukaSurvei(single, single.existingResponse ? 'edit' : 'baru');
+    }
+});
+
+// Buka Formulir Survei (Bisa mode 'baru' atau 'edit')
+const bukaSurvei = (s: SurveyItem, action: 'baru' | 'edit' = 'edit') => {
+    activeSurvei.value = { ...s };
     currentQuestionIndex.value = 0;
     questionHistory.value = [0];
     skippedQuestionIds.value = [];
     photoPreviews.value = {};
 
-    if (s.existingResponse?.jawaban) {
+    // Jika mode edit dan ada data jawaban lama, isi ke form
+    if (action === 'edit' && s.existingResponse?.jawaban) {
         form.jawaban = { ...s.existingResponse.jawaban };
+        activeSurvei.value.existingResponse = s.existingResponse;
     } else {
+        // Jika mode baru, kosongkan jawaban agar mengirim row baru
         form.jawaban = {};
+        activeSurvei.value.existingResponse = null;
     }
     form.jawaban_foto = {};
 };
 
+// Tutup Formulir & Kembali
 const tutupSurvei = () => {
+    if (props.surveis.length === 1) {
+        window.history.back();
+        return;
+    }
     activeSurvei.value = null;
     form.reset();
     photoPreviews.value = {};
@@ -92,7 +110,7 @@ const currentQuestion = computed(() => {
     return activeSurvei.value.pertanyaans[currentQuestionIndex.value] || null;
 });
 
-// Helper parsing opsi jawaban (mendukung string biasa atau objek percabangan)
+// Helper parsing opsi jawaban
 const parseOption = (opt: any): OptionItem => {
     if (typeof opt === 'string') {
         return { teks: opt, aksi: 'lanjut', target_urutan: null };
@@ -104,7 +122,7 @@ const parseOption = (opt: any): OptionItem => {
     };
 };
 
-// Cek aksi dari jawaban pilihan ganda saat ini
+// Cek aksi percabangan dari opsi pilihan saat ini
 const currentSelectedOptionAction = computed(() => {
     if (!currentQuestion.value || currentQuestion.value.tipe_jawaban !== 'pilihan') return 'lanjut';
     const answer = form.jawaban[currentQuestion.value.id];
@@ -118,25 +136,29 @@ const currentSelectedOptionAction = computed(() => {
     return found ? parseOption(found) : { teks: answer, aksi: 'lanjut', target_urutan: null };
 });
 
-// Apakah soal saat ini merupakan soal terakhir (atau user memilih opsi yang langsung selesai)
+// Apakah soal saat ini merupakan soal terakhir?
 const isLastQuestion = computed(() => {
     if (!activeSurvei.value) return false;
     if (currentSelectedOptionAction.value.aksi === 'selesai') return true;
     return currentQuestionIndex.value === activeSurvei.value.pertanyaans.length - 1;
 });
 
-// Cek apakah soal saat ini kosong
+// Cek apakah soal wajib masih kosong
 const isCurrentQuestionEmpty = computed(() => {
-    if (!currentQuestion.value) return false;
+    if (!currentQuestion.value) return true;
     const q = currentQuestion.value;
     const val = form.jawaban[q.id];
+
     if (q.tipe_jawaban === 'foto') {
-        return !form.jawaban_foto[q.id] && !form.jawaban[q.id];
+        const adaFotoBaru = !!form.jawaban_foto[q.id];
+        const adaFotoLama = !!form.jawaban[q.id];
+        return !adaFotoBaru && !adaFotoLama;
     }
+
     return val === null || val === undefined || val === '';
 });
 
-// Navigasi Maju (Menerapkan Skip Logic)
+// Navigasi Maju (Skip Logic)
 const handleNext = () => {
     if (!activeSurvei.value || !currentQuestion.value) return;
 
@@ -145,11 +167,10 @@ const handleNext = () => {
 
     let nextIndex = currentQuestionIndex.value + 1;
 
-    // Logika Lompat ke Soal Tertentu
+    // Logika Lompat
     if (action.aksi === 'lompat' && action.target_urutan) {
-        const targetIdx = action.target_urutan - 1; // Konversi ke index 0-based
+        const targetIdx = action.target_urutan - 1;
         if (targetIdx >= 0 && targetIdx < totalQuestions) {
-            // Tandai semua soal di antara nomor ini dan target sebagai 'dilewati'
             for (let i = currentQuestionIndex.value + 1; i < targetIdx; i++) {
                 const skippedId = activeSurvei.value.pertanyaans[i].id;
                 if (!skippedQuestionIds.value.includes(skippedId)) {
@@ -169,7 +190,7 @@ const handleNext = () => {
 // Navigasi Mundur (History Back)
 const handleBack = () => {
     if (questionHistory.value.length > 1) {
-        questionHistory.value.pop(); // Hapus posisi saat ini
+        questionHistory.value.pop();
         const prevIdx = questionHistory.value[questionHistory.value.length - 1];
         currentQuestionIndex.value = prevIdx;
     }
@@ -196,16 +217,16 @@ const submitJawaban = () => {
 
     form.soal_dilewati = skippedQuestionIds.value;
 
+    const options = {
+        forceFormData: true,
+        preserveScroll: true,
+        onSuccess: () => tutupSurvei(),
+    };
+
     if (activeSurvei.value.existingResponse) {
-        form.post(`/survei/${activeSurvei.value.id}/update`, {
-            preserveScroll: true,
-            onSuccess: () => tutupSurvei(),
-        });
+        form.post(`/survei/${activeSurvei.value.id}/update`, options);
     } else {
-        form.post(`/survei/${activeSurvei.value.id}`, {
-            preserveScroll: true,
-            onSuccess: () => tutupSurvei(),
-        });
+        form.post(`/survei/${activeSurvei.value.id}`, options);
     }
 };
 </script>
@@ -227,7 +248,9 @@ const submitJawaban = () => {
                 {{ page.props.flash.error }}
             </div>
 
-            <!-- TAMPILAN 1: DAFTAR KARTU SURVEI -->
+            <!-- ============================================== -->
+            <!-- TAMPILAN 1: DAFTAR KARTU SURVEI                -->
+            <!-- ============================================== -->
             <div v-if="!activeSurvei" class="flex flex-col gap-6">
                 <div class="border-b border-outline-variant pb-4 select-none">
                     <h1 class="text-2xl font-bold text-on-surface">Survei & Kuisioner Aktif</h1>
@@ -250,10 +273,41 @@ const submitJawaban = () => {
 
                         <div class="pt-3 border-t border-outline-variant flex items-center justify-between">
                             <span class="text-xs text-on-surface-variant font-medium">{{ s.total_pertanyaan }} Soal</span>
-                            <button type="button" @click="bukaSurvei(s)" :class="['inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold cursor-pointer border-none shadow-xs', s.sudah_diisi ? 'bg-surface-container-high hover:bg-surface-variant text-on-surface' : 'bg-primary hover:bg-on-primary-fixed-variant text-on-primary']">
-                                <span class="material-symbols-outlined text-[16px]">{{ s.sudah_diisi ? 'edit_note' : 'play_arrow' }}</span>
-                                <span>{{ s.sudah_diisi ? 'Lihat / Edit Jawaban' : 'Mulai Isi Survei' }}</span>
-                            </button>
+
+                            <!-- JIKA SURVEI BERKALI-KALI & SUDAH PERNAH DIISI: TAMPILKAN 2 TOMBOL -->
+                            <div v-if="s.batas_pengisian === 'berkali_kali' && s.sudah_diisi" class="flex gap-2">
+                                <button
+                                    type="button"
+                                    @click="bukaSurvei(s, 'baru')"
+                                    class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold transition-colors cursor-pointer border-none shadow-xs bg-primary hover:bg-on-primary-fixed-variant text-on-primary"
+                                >
+                                    <span class="material-symbols-outlined text-[16px]">add</span>
+                                    <span>Isi Baru</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    @click="bukaSurvei(s, 'edit')"
+                                    class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold transition-colors cursor-pointer border-none shadow-xs bg-surface-container-high hover:bg-surface-variant text-on-surface"
+                                >
+                                    <span class="material-symbols-outlined text-[16px]">edit_note</span>
+                                    <span>Edit Terakhir</span>
+                                </button>
+                            </div>
+
+                            <!-- JIKA SURVEI SEKALI ATAU BELUM PERNAH DIISI -->
+                            <div v-else>
+                                <button
+                                    type="button"
+                                    @click="bukaSurvei(s, 'edit')"
+                                    :class="[
+                                        'inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold cursor-pointer border-none shadow-xs',
+                                        s.sudah_diisi ? 'bg-surface-container-high hover:bg-surface-variant text-on-surface' : 'bg-primary hover:bg-on-primary-fixed-variant text-on-primary'
+                                    ]"
+                                >
+                                    <span class="material-symbols-outlined text-[16px]">{{ s.sudah_diisi ? 'edit_note' : 'play_arrow' }}</span>
+                                    <span>{{ s.sudah_diisi ? 'Lihat / Edit Jawaban' : 'Mulai Isi Survei' }}</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -264,7 +318,9 @@ const submitJawaban = () => {
                 </div>
             </div>
 
-            <!-- TAMPILAN 2: PENGISIAN SATU PER SATU (ONE-BY-ONE CARD) -->
+            <!-- ============================================== -->
+            <!-- TAMPILAN 2: PENGISIAN SATU PER SATU            -->
+            <!-- ============================================== -->
             <div v-else-if="currentQuestion" class="flex flex-col gap-5">
 
                 <!-- Header Atas: Tombol Keluar & Progress Bar -->
@@ -274,7 +330,6 @@ const submitJawaban = () => {
                         <span>Keluar Survei</span>
                     </button>
 
-                    <!-- Indikator Langkah -->
                     <span class="text-xs font-bold text-primary">
                         Soal {{ currentQuestionIndex + 1 }} dari {{ activeSurvei.pertanyaans.length }}
                     </span>
@@ -291,14 +346,20 @@ const submitJawaban = () => {
                     <span>Mode Edit Tanggapan (Terakhir disimpan: {{ activeSurvei.existingResponse.tanggal_update || activeSurvei.existingResponse.tanggal_submit }})</span>
                 </div>
 
+                <div v-if="activeSurvei.isReadOnly" class="p-3.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 text-xs font-semibold flex items-center gap-2 select-none">
+                    <span class="material-symbols-outlined text-[18px]">lock</span>
+                    <span>Survei telah ditutup. Anda hanya dapat melihat jawaban.</span>
+                </div>
+
                 <!-- KARTU SOAL TUNGGAL (ONE-BY-ONE) -->
                 <div class="bg-surface-container-lowest border border-outline-variant rounded-3xl p-6 sm:p-10 shadow-sm flex flex-col gap-6">
 
                     <div class="flex flex-col gap-2">
                         <div class="flex items-start justify-between gap-3">
                             <span class="text-xs font-bold text-primary uppercase tracking-wider select-none">Pertanyaan #{{ currentQuestionIndex + 1 }}</span>
+
                             <!-- NOTIFIKASI HARAP DIISI -->
-                            <span v-if="currentQuestion.wajib_diisi && isCurrentQuestionEmpty" class="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20 select-none">
+                            <span v-if="currentQuestion.wajib_diisi && isCurrentQuestionEmpty" class="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20 select-none transition-all duration-200">
                                 <span class="material-symbols-outlined text-[13px]">warning</span> Harap Diisi
                             </span>
                         </div>
@@ -317,12 +378,14 @@ const submitJawaban = () => {
                                 v-for="(optRaw, oIdx) in currentQuestion.opsi_pilihan"
                                 :key="oIdx"
                                 type="button"
+                                :disabled="activeSurvei.isReadOnly"
                                 @click="form.jawaban[currentQuestion.id] = parseOption(optRaw).teks"
                                 :class="[
                                     'p-4 rounded-2xl border text-left cursor-pointer transition-all flex items-center justify-between',
                                     form.jawaban[currentQuestion.id] === parseOption(optRaw).teks
                                         ? 'border-primary bg-primary/10 text-primary font-bold ring-1 ring-primary'
-                                        : 'border-outline-variant bg-surface-container-low text-on-surface hover:bg-surface-container-high'
+                                        : 'border-outline-variant bg-surface-container-low text-on-surface hover:bg-surface-container-high',
+                                    activeSurvei.isReadOnly ? 'opacity-70 cursor-not-allowed' : ''
                                 ]"
                             >
                                 <span class="text-sm font-semibold">{{ parseOption(optRaw).teks }}</span>
@@ -337,8 +400,9 @@ const submitJawaban = () => {
                             <textarea
                                 v-model="form.jawaban[currentQuestion.id]"
                                 rows="3"
+                                :disabled="activeSurvei.isReadOnly"
                                 placeholder="Ketikkan jawaban Anda di sini..."
-                                class="w-full p-4 border border-outline rounded-2xl bg-surface-container-low text-sm text-on-surface focus:outline-none focus:border-primary resize-none"
+                                class="w-full p-4 border border-outline rounded-2xl bg-surface-container-low text-sm text-on-surface focus:outline-none focus:border-primary resize-none disabled:opacity-60"
                             ></textarea>
                         </div>
 
@@ -347,8 +411,9 @@ const submitJawaban = () => {
                             <input
                                 v-model.number="form.jawaban[currentQuestion.id]"
                                 type="number"
+                                :disabled="activeSurvei.isReadOnly"
                                 placeholder="Masukkan angka..."
-                                class="w-full h-12 px-4 border border-outline rounded-2xl bg-surface-container-low text-base text-on-surface focus:outline-none focus:border-primary"
+                                class="w-full h-12 px-4 border border-outline rounded-2xl bg-surface-container-low text-base text-on-surface focus:outline-none focus:border-primary disabled:opacity-60"
                             />
                         </div>
 
@@ -356,7 +421,7 @@ const submitJawaban = () => {
                         <div v-else-if="currentQuestion.tipe_jawaban === 'foto'" class="flex flex-col gap-3">
                             <div v-if="photoPreviews[currentQuestion.id]" class="relative w-full max-w-sm rounded-xl overflow-hidden border border-outline-variant">
                                 <img :src="photoPreviews[currentQuestion.id]" class="w-full h-48 object-cover" />
-                                <button type="button" @click="hapusFotoBaru(currentQuestion.id)" class="absolute top-2 right-2 bg-error text-on-error p-1 rounded-lg border-none cursor-pointer">
+                                <button v-if="!activeSurvei.isReadOnly" type="button" @click="hapusFotoBaru(currentQuestion.id)" class="absolute top-2 right-2 bg-error text-on-error p-1 rounded-lg border-none cursor-pointer">
                                     <span class="material-symbols-outlined text-[16px]">close</span>
                                 </button>
                             </div>
@@ -366,7 +431,7 @@ const submitJawaban = () => {
                                 <span class="absolute bottom-2 left-2 bg-black/70 text-white text-[10px] px-2 py-0.5 rounded font-mono">Foto Tersimpan</span>
                             </div>
 
-                            <input type="file" accept="image/*" @change="(e) => handlePhotoUpload(currentQuestion!.id, e)" class="text-xs text-on-surface-variant file:mr-3 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-primary file:text-on-primary file:cursor-pointer" />
+                            <input v-if="!activeSurvei.isReadOnly" type="file" accept="image/*" @change="(e) => handlePhotoUpload(currentQuestion!.id, e)" class="text-xs text-on-surface-variant file:mr-3 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-primary file:text-on-primary file:cursor-pointer" />
                         </div>
                     </div>
 
@@ -384,8 +449,7 @@ const submitJawaban = () => {
                         </button>
 
                         <!-- Tombol Maju / Kirim -->
-                        <div>
-                            <!-- Jika Masih Ada Soal Berikutnya -->
+                        <div v-if="!activeSurvei.isReadOnly">
                             <button
                                 v-if="!isLastQuestion"
                                 type="button"
@@ -397,7 +461,6 @@ const submitJawaban = () => {
                                 <span class="material-symbols-outlined text-sm">arrow_forward</span>
                             </button>
 
-                            <!-- Jika Ini Soal Terakhir (Atau Opsi Langsung Selesai) -->
                             <button
                                 v-else
                                 type="button"

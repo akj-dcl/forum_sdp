@@ -5,10 +5,12 @@ import type { BreadcrumbItem } from '@/types';
 
 interface Props {
     roles?: string[];
+    channels?: { id: number; name: string }[];
 }
 
 const props = withDefaults(defineProps<Props>(), {
     roles: () => [],
+    channels: () => [],
 });
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -43,6 +45,7 @@ interface FormState {
 
 const form = useForm<FormState>({
     judul: '',
+    channel_id: '',
     deskripsi: '',
     batas_pengisian: 'sekali',
     tanggal_mulai: '',
@@ -107,6 +110,10 @@ const hapusOpsi = (qIdx: number, oIdx: number) => {
 const submit = () => {
     form.post('/admin/master-survei');
 };
+
+
+
+
 </script>
 
 <template>
@@ -189,7 +196,14 @@ const submit = () => {
                             </label>
                         </div>
                     </div>
-                </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-xs font-bold text-on-surface">Pilih Channel (Saluran) Penempatan Survei</label>
+                            <select v-model="form.channel_id" class="h-10 px-3 border border-outline rounded-xl bg-surface-container-low text-xs text-on-surface focus:outline-none focus:border-primary">
+                            <option value="">General Feed</option>
+                                <option v-for="ch in channels" :key="ch.id" :value="ch.id">{{ ch.name }}</option>
+                            </select>
+                        </div>
+                    </div>
 
                 <!-- 2. BUTIR SOAL DENGAN SKIP LOGIC -->
                 <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-6 shadow-sm flex flex-col gap-5">
@@ -286,7 +300,6 @@ const submit = () => {
                         {{ form.processing ? 'Posting...' : 'Post Survei' }}
                     </button>
                 </div>
-
             </form>
         </div>
     </AppLayout>

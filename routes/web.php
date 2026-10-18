@@ -18,13 +18,16 @@ use App\Http\Controllers\Admin\ChannelController;
 use App\Http\Controllers\Admin\CorporateHighlightController;
 use App\Services\WsoApiService;
 use App\Services\SdpMasterService;
+use App\Http\Controllers\SurveiController;
+use App\Http\Controllers\SurveiLayananController;
+use App\Http\Controllers\Admin\MasterSurveiController;
+
 
 Route::get('/test-kanwil', function (SdpMasterService $sdp) {
 
     return response()->json(
         $sdp->getKanwil()
     );
-
 });
 
 Route::get('/test-upt', function (SdpMasterService $sdp) {
@@ -32,7 +35,6 @@ Route::get('/test-upt', function (SdpMasterService $sdp) {
     return response()->json(
         $sdp->getUpt()
     );
-
 });
 
 // Route::get('/test-kanwil', function (WsoApiService $api) {
@@ -72,6 +74,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('api/direct-messages/history/{user}', [DirectMessageController::class, 'getHistory']);
     Route::post('api/direct-messages/send', [DirectMessageController::class, 'sendMessage']);
     Route::post('api/direct-messages/read/{sender}', [DirectMessageController::class, 'markAsRead']);
+    Route::get('survei-layanan', [SurveiLayananController::class, 'create'])->name('survei-layanan.create');
+    Route::post('survei-layanan', [SurveiLayananController::class, 'store'])->name('survei-layanan.store');
+
+    //survey
+    Route::get('survei', [SurveiController::class, 'index'])->name('survei.index');
+    Route::post('survei/{id}', [SurveiController::class, 'store'])->name('survei.store');
+    Route::post('survei/{id}/update', [SurveiController::class, 'update'])->name('survei.update');
 });
 Route::get('/view-file', [FileStreamController::class, 'show'])->name('view.file');
 
@@ -84,8 +93,8 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
     Route::resource('jenis-golongans', JenisGolonganController::class);
     Route::resource('channels', ChannelController::class);
     Route::resource('corporate-highlights', CorporateHighlightController::class)->names('corporate-highlights');
-    
-
+    Route::resource('hasil-survei', SurveiController::class)->names('admin.hasil-survei');
+    Route::resource('master-survei', MasterSurveiController::class)->names('admin.master-survei');
 });
 
 require __DIR__ . '/settings.php';

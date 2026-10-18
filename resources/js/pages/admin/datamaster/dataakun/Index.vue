@@ -39,11 +39,11 @@ watch(
   debounce((newSearch: string) => {
     const params = new URLSearchParams();
     if (newSearch) params.append('search', newSearch);
-    
+
     router.get(window.location.pathname, Object.fromEntries(params), {
       preserveState: true,
       preserveScroll: true,
-      replace: true 
+      replace: true
     });
   }, 300)
 )
@@ -80,7 +80,15 @@ const deleteUser = (id: number) => {
       <div class="grid gap-3 md:grid-cols-4">
         <input v-model="search" type="text" placeholder="Cari nama atau NIP..." class="col-span-1 md:col-span-2 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
       </div>
-
+      <div v-if="users.links?.length > 3" class="flex items-center justify-between mt-2">
+        <div class="text-sm text-muted-foreground">Menampilkan {{ users.from ?? 0 }} sampai {{ users.to ?? 0 }} dari {{ users.total }} data</div>
+        <div class="flex gap-1">
+          <template v-for="(link, key) in users.links" :key="key">
+            <div v-if="link.url === null" class="px-3 py-1 text-sm text-muted-foreground border border-transparent" v-html="link.label" />
+            <Link v-else :href="link.url" preserve-state preserve-scroll class="px-3 py-1 text-sm rounded-md border transition-colors" :class="link.active ? 'bg-primary text-primary-foreground border-primary' : 'border-border bg-background hover:bg-accent hover:text-accent-foreground'" v-html="link.label" />
+          </template>
+        </div>
+      </div>
       <div class="rounded-xl border border-border bg-card text-card-foreground shadow-sm overflow-hidden">
         <div class="relative w-full overflow-auto">
           <table class="w-full caption-bottom text-sm">
@@ -134,7 +142,7 @@ const deleteUser = (id: number) => {
       </div>
 
       <div v-if="users.links?.length > 3" class="flex items-center justify-between mt-2">
-        <div class="text-sm text-muted-foreground">Menampilkan {{ users.from ?? 0 }} sampai {{ users.to ?? 0 }} dari {{ users.total }} data</div>
+        <div class="text-sm text-muted-foreground"></div>
         <div class="flex gap-1">
           <template v-for="(link, key) in users.links" :key="key">
             <div v-if="link.url === null" class="px-3 py-1 text-sm text-muted-foreground border border-transparent" v-html="link.label" />

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Kanwil;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -12,14 +13,21 @@ class KanwilController extends Controller
     public function index(Request $request)
     {
         $kanwils = Kanwil::when($request->search, function ($query, $search) {
-                $query->where('name', 'like', "%{$search}%");
-            })
+            $query->where('name', 'like', "%{$search}%")
+                ->orWhere('code', 'like', "%{$search}%")
+                ->orWhere('address', 'like', "%{$search}%");
+        })
             ->paginate(10)
             ->withQueryString();
 
+        $kanwilKosong = Kanwil::whereDoesntHave('upts', function (Builder $query) {
+            $query->where('name', '!=', '-');
+        })->get();
+
         return Inertia::render('admin/datamaster/kanwil/Index', [
             'kanwils' => $kanwils,
-            'filters' => $request->only(['search'])
+            'filters' => $request->only(['search']),
+            'kanwilKosong' => $kanwilKosong
         ]);
     }
 

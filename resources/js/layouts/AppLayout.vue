@@ -105,7 +105,7 @@ const openChat = async (contact: any) => {
     activeDmChat.value = contact;
     newDmMessage.value = '';
     await fetchChatHistory(contact.id);
-    
+
     // Poll for new messages every 3 seconds while chat is active
     if (historyPollInterval) clearInterval(historyPollInterval);
     historyPollInterval = setInterval(() => {
@@ -144,10 +144,10 @@ const fetchChatHistory = async (userId: number, quiet = false) => {
 
 const sendDmMessage = async () => {
     if (!newDmMessage.value.trim() || !activeDmChat.value) return;
-    
+
     const text = newDmMessage.value;
     newDmMessage.value = '';
-    
+
     try {
         const res = await axios.post('/api/direct-messages/send', {
             receiver_id: activeDmChat.value.id,
@@ -179,8 +179,8 @@ onBeforeUnmount(() => {
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
     </Head>
+<div class="bg-surface text-on-surface min-h-screen flex font-body-md text-body-md w-full relative" style="font-family: 'Inter', sans-serif;">
 
-    <div class="bg-surface text-on-surface min-h-screen flex font-body-md text-body-md w-full relative" style="font-family: 'Inter', sans-serif;">
         <!-- Backdrop overlay for mobile sidebar -->
         <div v-if="showMobileSidebar" @click="showMobileSidebar = false" class="fixed inset-0 bg-black/40 z-30 lg:hidden"></div>
 
@@ -221,7 +221,7 @@ onBeforeUnmount(() => {
                     <span class="material-symbols-outlined" :style="isActive('/dashboard') ? 'font-variation-settings: \'FILL\' 1;' : ''">home</span>
                     <span v-if="!isSidebarCollapsed" class="font-label-md text-label-md">Home Feed</span>
                 </Link>
-                
+
                 <Link :class="[
                     'flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200',
                     isSidebarCollapsed ? 'justify-center px-0 w-10 h-10 mx-auto' : '',
@@ -230,8 +230,25 @@ onBeforeUnmount(() => {
                     <span class="material-symbols-outlined" :style="isActive('/direct-messages') ? 'font-variation-settings: \'FILL\' 1;' : ''">chat</span>
                     <span v-if="!isSidebarCollapsed" class="font-label-md text-label-md">Direct Messages</span>
                 </Link>
-                
+
+                <Link :class="[
+                    'flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200',
+                    isSidebarCollapsed ? 'justify-center px-0 w-10 h-10 mx-auto' : '',
+                    isActive('/survei') ? 'bg-primary text-on-primary font-bold shadow-sm' : 'text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-high dark:hover:bg-surface-dim'
+                ]" href="/survei" :title="isSidebarCollapsed ? 'Survei' : ''">
+                    <span class="material-symbols-outlined" :style="isActive('/survei') ? 'font-variation-settings: \'FILL\' 1;' : ''">assignment</span>
+                    <span v-if="!isSidebarCollapsed" class="font-label-md text-label-md">Survei</span>
+                </Link>
+
                 <!-- Dynamic Navigation depending on roles -->
+                <Link v-if="hasRole('Super Admin') || hasRole('Admin Kanwil')" :class="[
+                    'flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200',
+                    isSidebarCollapsed ? 'justify-center px-0 w-10 h-10 mx-auto' : '',
+                    isActive('/admin/master-survei') ? 'bg-primary text-on-primary font-bold shadow-sm' : 'text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-high dark:hover:bg-surface-dim'
+                ]" href="/admin/master-survei" :title="isSidebarCollapsed ? 'Master Survei' : ''">
+                    <span class="material-symbols-outlined" :style="isActive('/admin/master-survei') ? 'font-variation-settings: \'FILL\' 1;' : ''">quiz</span>
+                    <span v-if="!isSidebarCollapsed" class="font-label-md text-label-md">Master Survei</span>
+                </Link>
                 <Link v-if="hasRole('Super Admin') || hasRole('Admin Kanwil')" :class="[
                     'flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200',
                     isSidebarCollapsed ? 'justify-center px-0 w-10 h-10 mx-auto' : '',
@@ -249,7 +266,7 @@ onBeforeUnmount(() => {
                     <span class="material-symbols-outlined" :style="isActive('/admin/kanwils') ? 'font-variation-settings: \'FILL\' 1;' : ''">account_balance</span>
                     <span v-if="!isSidebarCollapsed" class="font-label-md text-label-md">Kanwil</span>
                 </Link>
-                
+
                 <Link v-if="hasRole('Super Admin') || hasRole('Admin Kanwil')" :class="[
                     'flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200',
                     isSidebarCollapsed ? 'justify-center px-0 w-10 h-10 mx-auto' : '',
@@ -401,7 +418,7 @@ onBeforeUnmount(() => {
                             <img v-if="user.avatar" :src="user.avatar" class="w-full h-full object-cover" :alt="user.name" />
                             <span v-else>{{ getInitials(user.name) }}</span>
                         </button>
-                        
+
                         <div v-if="showUserMenu" class="absolute right-0 mt-2 w-56 bg-surface-container-lowest border border-outline-variant rounded-xl shadow-lg py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
                             <div class="px-4 py-2 border-b border-outline-variant">
                                 <p class="font-bold text-on-surface truncate">{{ user.name }}</p>
@@ -435,7 +452,7 @@ onBeforeUnmount(() => {
                         <span v-if="idx < breadcrumbs.length - 1" class="text-outline-variant mx-1">/</span>
                     </template>
                 </nav>
-                
+
                 <slot />
             </main>
 

@@ -14,7 +14,12 @@ class UptController extends Controller
     {
         $upts = Upt::with('kanwil')
             ->when($request->search, function ($query, $search) {
-                $query->where('name', 'like', "%{$search}%");
+                $query->where('name', 'like', "%{$search}%")
+                    ->orwhere('address', 'like', "%{$search}%")
+                    ->orWhere('is_active', 'like', "%{$search}%")
+                    ->orWhereHas('kanwil', function ($query) use ($search) {
+                        $query->where('name', 'like', "%{$search}%");
+                    });
             })
             ->paginate(10)
             ->withQueryString();

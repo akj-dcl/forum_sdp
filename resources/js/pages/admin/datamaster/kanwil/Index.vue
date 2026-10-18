@@ -3,7 +3,7 @@ import AppLayout from '@/layouts/AppLayout.vue'
 import { Head, Link, router, usePage } from '@inertiajs/vue3'
 import { ref, watch } from 'vue'
 import { debounce } from 'lodash'
-import { can } from '@/lib/can' 
+import { can } from '@/lib/can'
 
 type Kanwil = {
   id: number
@@ -35,7 +35,7 @@ watch(
   debounce((newSearch: string) => {
     const params = new URLSearchParams();
     if (newSearch) params.append('search', newSearch);
-    
+
     // Ganti window.location dengan router.get dari Inertia
     router.get(window.location.pathname, Object.fromEntries(params), {
       preserveState: true,
@@ -55,7 +55,7 @@ function destroyKanwil(id: number) {
   <Head title="Master Kanwil" />
 
   <AppLayout>
-    <div class="flex h-full flex-1 flex-col gap-4 p-4 md:p-6 bg-background text-foreground">
+    <div class="flex h-full flex-1 flex-col gap-4 p-4 md:p-6 bg-background text-foreground dark:dark:bg-inverse-surface">
       <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 class="text-2xl font-semibold tracking-tight">Master Kanwil</h1>
@@ -163,7 +163,7 @@ function destroyKanwil(id: number) {
             <Link
               v-else
               :href="link.url"
-              preserve-state 
+              preserve-state
               preserve-scroll
               class="px-3 py-1 text-sm rounded-md border transition-colors"
               :class="link.active

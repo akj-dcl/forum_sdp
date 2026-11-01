@@ -15,6 +15,7 @@ type User = {
   roles: { id: number; name: string }[]
   upt?: { id: number; name: string }
   kanwil?: { id: number; name: string }
+  jenis_upts_id?: number | null
   jenis_golongan?: { id: number; nama_golongan: string }
 }
 
@@ -28,23 +29,29 @@ const props = defineProps<{
     to: number
     total: number
   }
-  filters: { search?: string }
+  filters: {
+    search?: string
+    per_page?: string | number
+  }
 }>()
 
 const page = usePage()
 const search = ref(props.filters.search || '')
+const perPage = ref(Number(props.filters.per_page) || 10)
 
+// Watcher untuk mendeteksi perubahan search dan perPage secara bersamaan
 watch(
-  search,
-  debounce((newSearch: string) => {
-    const params = new URLSearchParams();
-    if (newSearch) params.append('search', newSearch);
+  [search, perPage],
+  debounce(([newSearch, newPerPage]) => {
+    const params = new URLSearchParams()
+    if (newSearch) params.append('search', newSearch)
+    if (newPerPage && Number(newPerPage) !== 10) params.append('per_page', String(newPerPage))
 
     router.get(window.location.pathname, Object.fromEntries(params), {
       preserveState: true,
       preserveScroll: true,
       replace: true
-    });
+    })
   }, 300)
 )
 
@@ -58,6 +65,7 @@ const deleteUser = (id: number) => {
 
   <AppLayout>
     <div class="flex h-full flex-1 flex-col gap-4 p-4 md:p-6 bg-background text-foreground">
+      <!-- Header -->
       <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 class="text-2xl font-semibold tracking-tight">Data Akun Pegawai</h1>
@@ -73,22 +81,49 @@ const deleteUser = (id: number) => {
         </Link>
       </div>
 
+      <!-- Flash Message -->
       <div v-if="page.props.flash?.success" class="rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-600 dark:text-emerald-400">
         {{ page.props.flash.success }}
       </div>
 
-      <div class="grid gap-3 md:grid-cols-4">
-        <input v-model="search" type="text" placeholder="Cari nama atau NIP..." class="col-span-1 md:col-span-2 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+      <!-- Toolbar Atas: Search & Dropdown Pilihan Jumlah Data (Per Page) -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <input
+          v-model="search"
+          type="text"
+          placeholder="Cari nama, NIP, jabatan..."
+          class="flex h-10 w-full sm:w-80 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        />
+
+        <div class="flex items-center gap-2 text-xs text-muted-foreground select-none">
+          <span>Tampilkan:</span>
+          <select
+            v-model="perPage"
+            class="h-9 px-2.5 rounded-md border border-input bg-background text-foreground text-xs focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
+          >
+            <option :value="10">10 data</option>
+            <option :value="25">25 data</option>
+            <option :value="50">50 data</option>
+            <option :value="100">100 data</option>
+          </select>
+        </div>
       </div>
-      <div v-if="users.links?.length > 3" class="flex items-center justify-between mt-2">
-        <div class="text-sm text-muted-foreground">Menampilkan {{ users.from ?? 0 }} sampai {{ users.to ?? 0 }} dari {{ users.total }} data</div>
-        <div class="flex gap-1">
+
+      <!-- Navigasi Halaman & Jumlah Data di BAGIAN ATAS TABEL -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mt-1">
+        <div class="text-sm text-muted-foreground">
+          Menampilkan {{ users.from ?? 0 }} sampai {{ users.to ?? 0 }} dari {{ users.total }} data
+        </div>
+
+        <div v-if="users.links?.length > 3" class="flex gap-1">
           <template v-for="(link, key) in users.links" :key="key">
             <div v-if="link.url === null" class="px-3 py-1 text-sm text-muted-foreground border border-transparent" v-html="link.label" />
             <Link v-else :href="link.url" preserve-state preserve-scroll class="px-3 py-1 text-sm rounded-md border transition-colors" :class="link.active ? 'bg-primary text-primary-foreground border-primary' : 'border-border bg-background hover:bg-accent hover:text-accent-foreground'" v-html="link.label" />
           </template>
         </div>
       </div>
+
+      <!-- Tabel Data Akun -->
       <div class="rounded-xl border border-border bg-card text-card-foreground shadow-sm overflow-hidden">
         <div class="relative w-full overflow-auto">
           <table class="w-full caption-bottom text-sm">
@@ -120,7 +155,10 @@ const deleteUser = (id: number) => {
                   </div>
                 </td>
                 <td class="p-4">
-                  <span v-if="u.upt" class="font-medium text-emerald-700">{{ u.upt.name }}</span>
+                  <span v-if="u.upt && u.jenis_upts_id == 1" class="inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 uppercase select-none">{{ u.upt.name }}</span>
+                  <span v-else-if="u.upt && u.jenis_upts_id == 2" class="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-semibold text-green-700 dark:bg-green-900/30 dark:text-green-400 uppercase select-none">{{ u.upt.name }}</span>
+                  <span v-else-if="u.upt && u.jenis_upts_id == 3" class="inline-flex items-center rounded-full bg-pink-100 px-2 py-0.5 text-[10px] font-semibold text-pink-700 dark:bg-pink-900/30 dark:text-pink-400 uppercase select-none">{{ u.upt.name }}</span>
+                  <span v-else-if="u.upt && u.jenis_upts_id == 4" class="inline-flex items-center rounded-full bg-yellow-100 px-2 py-0.5 text-[10px] font-semibold text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400 uppercase select-none">{{ u.upt.name }}</span>
                   <span v-else-if="u.kanwil" class="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
                     Kanwil {{ u.kanwil.name }}
                   </span>
@@ -141,8 +179,8 @@ const deleteUser = (id: number) => {
         </div>
       </div>
 
-      <div v-if="users.links?.length > 3" class="flex items-center justify-between mt-2">
-        <div class="text-sm text-muted-foreground"></div>
+      <!-- Navigasi Halaman Bawah (Hanya tombol halaman tanpa duplikasi teks jumlah) -->
+      <div v-if="users.links?.length > 3" class="flex items-center justify-end mt-2">
         <div class="flex gap-1">
           <template v-for="(link, key) in users.links" :key="key">
             <div v-if="link.url === null" class="px-3 py-1 text-sm text-muted-foreground border border-transparent" v-html="link.label" />

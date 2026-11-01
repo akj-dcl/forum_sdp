@@ -60,6 +60,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
     Route::post('posts/{post}/react', [PostController::class, 'toggleReaction'])->name('posts.react');
     Route::post('posts/{post}/comments', [PostController::class, 'storeComment'])->name('posts.comments.store');
+    Route::post('/posts/{post}/pin', [DashboardController::class, 'togglePin'])->name('posts.pin');
     Route::put('comments/{comment}', [PostController::class, 'updateComment'])->name('comments.update');
     Route::delete('comments/{comment}', [PostController::class, 'destroyComment'])->name('comments.destroy');
 

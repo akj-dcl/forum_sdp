@@ -33,6 +33,7 @@ class DashboardController extends Controller
             ->when($activeChannel, function ($query) use ($activeChannel) {
                 $query->where('channel_id', $activeChannel->id);
             })
+            ->orderByDesc('is_pinned')
             ->latest()
             ->get()
             ->map(function ($post) {
@@ -46,6 +47,7 @@ class DashboardController extends Controller
 
                 return [
                     'id' => $post->id,
+                    'is_pinned' => (bool) $post->is_pinned,
                     'content' => $post->content,
                     'time' => $post->created_at->diffForHumans(),
                     'category' => $post->channel?->name ?? 'General Feed',
@@ -106,10 +108,17 @@ class DashboardController extends Controller
             ];
         });
 
+        // --- FILTER SURVEI CHANNEL BERDASARKAN 4 ROLE TIER ---
         $channelId = $activeChannel ? $activeChannel->id : null;
         $user = auth()->user();
-        $userRoles = $user->getRoleNames()->toArray();
         $today = now()->toDateString();
+
+        // Ambil nama-nama tier dari seluruh role milik user (Super Admin, Admin, Supervisor, Operator)
+        $userTiers = $user ? $user->roles()
+            ->join('role_tiers', 'roles.role_tier_id', '=', 'role_tiers.id')
+            ->pluck('role_tiers.nama_tier')
+            ->unique()
+            ->toArray() : [];
 
         $activeSurveis = MasterSurvei::where('channel_id', $channelId)
             ->where('is_active', true)
@@ -120,20 +129,21 @@ class DashboardController extends Controller
                 $q->whereNull('tanggal_selesai')->orWhere('tanggal_selesai', '>=', $today);
             })
             ->get()
-            ->filter(function ($survei) use ($userRoles) {
-                if (empty($survei->target_roles)) return true;
-                return count(array_intersect($userRoles, $survei->target_roles)) > 0;
+            // Cocokkan target tier survei dengan tier user
+            ->filter(function ($survei) use ($userTiers) {
+                if (empty($survei->target_roles)) return true; // Jika kosong, semua tier boleh akses
+                return count(array_intersect($userTiers, $survei->target_roles)) > 0;
             })
             ->map(function ($survei) use ($user) {
-                // Cek apakah user sudah mengisi
                 $respon = ResponSurvei::where('survei_id', $survei->id)
                     ->where('user_id', $user->id)
                     ->latest()
                     ->first();
+
                 return [
                     'id' => $survei->id,
                     'judul' => $survei->judul,
-                    'batas_pengisian' => $survei->batas_pengisian, // <-- TAMBAHKAN BARIS INI
+                    'batas_pengisian' => $survei->batas_pengisian,
                     'sudah_diisi' => $respon !== null,
                     'tanggal_selesai' => $survei->tanggal_selesai?->format('d M Y'),
                 ];
@@ -147,5 +157,13 @@ class DashboardController extends Controller
             'highlights' => $highlights,
             'activeSurveis' => $activeSurveis,
         ]);
+    }
+    public function togglePin(Post $post)
+    {
+        $post->update([
+            'is_pinned' => !$post->is_pinned,
+        ]);
+
+        return back();
     }
 }

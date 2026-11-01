@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\MasterSurvei;
 use App\Models\PertanyaanSurvei;
+use App\Models\RoleTier;
 use App\Models\ResponSurvei;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -14,7 +15,7 @@ use Spatie\Permission\Models\Role;
 
 class MasterSurveiController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request) 
     {
         $surveis = MasterSurvei::with(['user'])
             ->withCount(['pertanyaans', 'respons'])
@@ -33,7 +34,7 @@ class MasterSurveiController extends Controller
 
     public function create()
     {
-        $roles = Role::pluck('name')->toArray();
+        $roles = RoleTier::pluck('nama_tier')->toArray();
         $channels = Channel::orderBy('name')->get();
 
         return Inertia::render('admin/datamaster/survei/Create', [
@@ -41,6 +42,7 @@ class MasterSurveiController extends Controller
             'channels' => $channels,
         ]);
     }
+
 
     public function store(Request $request)
     {

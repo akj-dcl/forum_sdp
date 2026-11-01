@@ -27,7 +27,7 @@ interface OptionItem {
 
 interface QuestionItem {
     teks_pertanyaan: string;
-    tipe_jawaban: 'teks' | 'pilihan' | 'angka' | 'foto';
+    tipe_jawaban: 'teks' | 'pilihan' | 'angka' | 'upload';
     opsi_pilihan: OptionItem[];
     wajib_diisi: boolean;
 }
@@ -247,7 +247,7 @@ const submit = () => {
                                     <option value="pilihan">Pilihan Ganda</option>
                                     <option value="teks">Teks</option>
                                     <option value="angka">Angka</option>
-                                    <option value="foto">Foto</option>
+                                    <option value="upload">Upload</option>
                                 </select>
                             </div>
                         </div>

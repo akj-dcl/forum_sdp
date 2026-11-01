@@ -503,6 +503,14 @@ const deleteComment = (commentId: number) => {
         });
     }
 };
+
+const pinPost = (postId: number) => {
+    if (confirm('Yakin ingin mengubah status pin postingan ini?')) {
+        router.post(`/posts/${postId}/pin`, {}, {
+            preserveScroll: true
+        });
+    }
+};
 </script>
 
 <template>
@@ -677,8 +685,16 @@ const deleteComment = (commentId: number) => {
                             </div>
                         </div>
 
-                        <!-- Edit / Delete actions for post owner -->
-                        <div v-if="post.author_id === user.id || hasRole('Super Admin')" class="flex items-center gap-1">
+
+                        <div v-if="post.author_id === user.id || hasRole('Super Admin')" class="flex items-center gap-1 ">
+                            <div v-if="hasRole('Super Admin')">
+                            <button v-if="!post.is_pinned" @click="pinPost(post.id)" class="text-on-surface-variant hover:text-primary p-1.5 rounded hover:bg-surface-container-low transition-colors cursor-pointer border-none bg-transparent flex items-center justify-center" title="Pin post">
+                                <span class="material-symbols-outlined text-[18px]">keep</span>
+                            </button>
+                            <button v-else @click="pinPost(post.id)" class="text-on-surface-variant hover:text-primary p-1.5 rounded hover:bg-surface-container-low transition-colors cursor-pointer border-none bg-transparent flex items-center justify-center" title="Unpin post">
+                                <span class="material-symbols-outlined text-[18px]">keep_off</span>
+                            </button>
+                            </div>
                             <button @click="startEditPost(post)" class="text-on-surface-variant hover:text-primary p-1.5 rounded hover:bg-surface-container-low transition-colors cursor-pointer border-none bg-transparent flex items-center justify-center" title="Edit">
                                 <span class="material-symbols-outlined text-[18px]">edit</span>
                             </button>
@@ -686,6 +702,7 @@ const deleteComment = (commentId: number) => {
                                 <span class="material-symbols-outlined text-[18px]">delete</span>
                             </button>
                         </div>
+
                     </div>
 
                     <!-- Body -->

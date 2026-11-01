@@ -9,12 +9,18 @@ use Inertia\Inertia;
 
 class SurveiController extends Controller
 {
-    // 1. Menampilkan daftar semua survei (saat diakses via menu Sidebar)
+    // 1. Menampilkan daftar survei (Portal Survei Umum)
     public function index()
     {
         $user = auth()->user();
-        $userRoles = $user->getRoleNames()->toArray();
         $today = now()->toDateString();
+
+        // Ambil nama-nama tier dari role user
+        $userTiers = $user ? $user->roles()
+            ->join('role_tiers', 'roles.role_tier_id', '=', 'role_tiers.id')
+            ->pluck('role_tiers.nama_tier')
+            ->unique()
+            ->toArray() : [];
 
         $surveis = MasterSurvei::with(['pertanyaans', 'channel'])
             ->where('is_active', true)
@@ -25,9 +31,9 @@ class SurveiController extends Controller
                 $q->whereNull('tanggal_selesai')->orWhere('tanggal_selesai', '>=', $today);
             })
             ->get()
-            ->filter(function ($survei) use ($userRoles) {
+            ->filter(function ($survei) use ($userTiers) {
                 if (empty($survei->target_roles)) return true;
-                return count(array_intersect($userRoles, $survei->target_roles)) > 0;
+                return count(array_intersect($userTiers, $survei->target_roles)) > 0;
             })
             ->map(function ($survei) use ($user, $today) {
                 $respon = ResponSurvei::where('survei_id', $survei->id)
@@ -63,16 +69,31 @@ class SurveiController extends Controller
         ]);
     }
 
-    public function show(Request $request, $id) // <-- Tambahkan Request $request
+    // 2. Menampilkan SATU survei spesifik (Saat diklik dari Dashboard Channel)
+    public function show(Request $request, $id)
     {
         $user = auth()->user();
         $today = now()->toDateString();
 
         $survei = MasterSurvei::with(['pertanyaans', 'channel'])->findOrFail($id);
 
-        $action = $request->query('action', 'edit'); // default 'edit' jika tidak ada param
+        // Validasi Hak Akses Tier User
+        $userTiers = $user ? $user->roles()
+            ->join('role_tiers', 'roles.role_tier_id', '=', 'role_tiers.id')
+            ->pluck('role_tiers.nama_tier')
+            ->unique()
+            ->toArray() : [];
+
+        $redirectUrl = $survei->channel_id ? '/dashboard?channel=' . $survei->channel->slug : '/dashboard';
+
+        if (!empty($survei->target_roles) && count(array_intersect($userTiers, $survei->target_roles)) === 0) {
+            return redirect($redirectUrl)->with('error', 'Akun Anda tidak memiliki hak akses untuk mengisi survei ini.');
+        }
+
+        // Tentukan apakah membuka respon lama (edit) atau formulir baru
+        $action = $request->query('action', 'edit');
         if ($survei->batas_pengisian === 'sekali') {
-            $action = 'edit'; // Paksa ke edit jika settingannya hanya 1x
+            $action = 'edit';
         }
 
         $respon = null;
@@ -109,12 +130,12 @@ class SurveiController extends Controller
         ]);
     }
 
+    // 3. Menyimpan jawaban survei baru
     public function store(Request $request, $id)
     {
         $user = auth()->user();
         $survei = MasterSurvei::with(['pertanyaans', 'channel'])->findOrFail($id);
 
-        // Agar setelah submit, user dikembalikan ke Channel asal
         $redirectUrl = $survei->channel_id ? '/dashboard?channel=' . $survei->channel->slug : '/dashboard';
 
         if ($survei->batas_pengisian === 'sekali') {
@@ -123,7 +144,7 @@ class SurveiController extends Controller
                 ->exists();
 
             if ($alreadyExists) {
-                return redirect($redirectUrl)->with('error', 'Anda sudah pernah mengisi survei ini.');
+                return redirect($redirectUrl)->with('error', 'Anda sudah pernah mengisi survei ini. Silakan gunakan opsi edit.');
             }
         }
 

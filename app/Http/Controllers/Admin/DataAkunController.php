@@ -16,6 +16,8 @@ class DataAkunController extends Controller
 {
     public function index(Request $request)
     {
+        $perPage = in_array((int)$request->per_page, [10, 25, 50, 100]) ? (int)$request->per_page : 10;
+
         $users = User::with(['roles', 'upt', 'kanwil', 'jenisGolongan'])
             ->whereDoesntHave('roles', function ($query) {
                 $query->where('name', 'Pengunjung');
@@ -39,12 +41,12 @@ class DataAkunController extends Controller
                     });
             })
             ->latest()
-            ->paginate(10)
+            ->paginate($perPage)
             ->withQueryString();
 
         return Inertia::render('admin/datamaster/dataakun/Index', [
             'users' => $users,
-            'filters' => $request->only(['search'])
+            'filters' => $request->only(['search', 'per_page'])
         ]);
     }
 
@@ -92,6 +94,7 @@ class DataAkunController extends Controller
 
         return redirect()->route('data-akun.index')->with('success', 'Akun pegawai berhasil dibuat.');
     }
+
     public function edit($id)
     {
         $user = User::findOrFail($id);

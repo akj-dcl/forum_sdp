@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Spatie\Permission\Traits\HasRoles;
@@ -28,6 +29,7 @@ class User extends Authenticatable
         'password',
         'upt_id',
         'jenis_golongan_id',
+        'jenis_upts_id',
         'kanwil_id',
         'avatar_path',
         'banner_path',
@@ -62,19 +64,24 @@ class User extends Authenticatable
         ];
     }
 
-    public function upt() 
+    public function upt()
     {
         return $this->belongsTo(Upt::class);
     }
 
-    public function kanwil() 
+    public function kanwil()
     {
         return $this->belongsTo(Kanwil::class);
     }
 
-    public function jenisGolongan() 
+    public function jenisGolongan()
     {
         return $this->belongsTo(JenisGolongan::class);
+    }
+
+    public function jenisUpt(): BelongsTo
+    {
+        return $this->belongsTo(JenisUpt::class, 'jenis_upts_id');
     }
 
     public function getAvatarUrlAttribute()

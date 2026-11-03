@@ -25,6 +25,7 @@ type ResponseItem = {
     user: { name: string; nip: string | null };
     upt: { name: string } | null;
     jawaban: Record<string, any>;
+    total_skor?: number;
     created_at: string;
     updated_at: string;
 };
@@ -140,6 +141,7 @@ const tutupDetail = () => {
                                 <th class="h-11 px-4 text-left">UPT</th>
                                 <th class="h-11 px-4 text-center">Waktu Kirim</th>
                                 <th class="h-11 px-4 text-center">Waktu Update</th>
+                                <th class="h-11 px-4 text-center">Total Skor</th>
                                 <th class="h-11 px-4 text-right">Aksi</th>
                             </tr>
                         </thead>
@@ -160,6 +162,12 @@ const tutupDetail = () => {
 
                                 <td class="p-4 text-center text-on-surface-variant font-mono text-[11px]">
                                     {{ r.updated_at !== r.created_at ? new Date(r.updated_at).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : '-' }}
+                                </td>
+
+                                <td class="p-4 text-center">
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-primary/10 text-primary font-black font-mono text-xs">
+                                        {{ r.total_skor ?? 0 }}
+                                    </span>
                                 </td>
 
                                 <td class="p-4 text-right">

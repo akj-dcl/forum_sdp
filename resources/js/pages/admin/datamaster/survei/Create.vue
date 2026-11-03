@@ -21,6 +21,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 interface OptionItem {
     teks: string;
+    skor: number;
     aksi: 'lanjut' | 'selesai' | 'lompat';
     target_urutan: number | null;
 }
@@ -34,6 +35,7 @@ interface QuestionItem {
 
 interface FormState {
     judul: string;
+    channel_id: string | number;
     deskripsi: string;
     batas_pengisian: 'sekali' | 'berkali_kali';
     tanggal_mulai: string;
@@ -57,8 +59,8 @@ const form = useForm<FormState>({
             teks_pertanyaan: '',
             tipe_jawaban: 'pilihan',
             opsi_pilihan: [
-                { teks: 'Berjalan', aksi: 'lanjut', target_urutan: null },
-                { teks: 'Tidak Berjalan', aksi: 'selesai', target_urutan: null },
+                { teks: 'Berjalan', skor: 10, aksi: 'lanjut', target_urutan: null },
+                { teks: 'Tidak Berjalan', skor: 0, aksi: 'selesai', target_urutan: null },
             ],
             wajib_diisi: true,
         },
@@ -81,7 +83,7 @@ const tambahPertanyaan = () => {
         teks_pertanyaan: '',
         tipe_jawaban: 'teks',
         opsi_pilihan: [
-            { teks: '', aksi: 'lanjut', target_urutan: null },
+            { teks: '', skor: 0, aksi: 'lanjut', target_urutan: null },
         ],
         wajib_diisi: true,
     });
@@ -96,6 +98,7 @@ const hapusPertanyaan = (idx: number) => {
 const tambahOpsi = (qIdx: number) => {
     form.pertanyaans[qIdx].opsi_pilihan.push({
         teks: '',
+        skor: 0,
         aksi: 'lanjut',
         target_urutan: null,
     });
@@ -110,10 +113,6 @@ const hapusOpsi = (qIdx: number, oIdx: number) => {
 const submit = () => {
     form.post('/admin/master-survei');
 };
-
-
-
-
 </script>
 
 <template>
@@ -125,7 +124,7 @@ const submit = () => {
             <div class="flex items-center justify-between select-none">
                 <div>
                     <h1 class="text-2xl font-bold text-on-surface">Buat Survei Baru</h1>
-                    <p class="text-xs text-on-surface-variant mt-1"></p>
+                    <p class="text-xs text-on-surface-variant mt-1">Konfigurasi survei dinamis, alur percabangan, sistem skor, dan penempatan channel.</p>
                 </div>
                 <Link href="/admin/master-survei" class="px-4 py-2 border border-outline rounded-xl text-xs font-semibold text-on-surface hover:bg-surface-container-high transition-colors no-underline">
                     Kembali
@@ -196,16 +195,17 @@ const submit = () => {
                             </label>
                         </div>
                     </div>
+
                     <div class="flex flex-col gap-1.5">
                         <label class="text-xs font-bold text-on-surface">Pilih Channel (Saluran) Penempatan Survei</label>
-                            <select v-model="form.channel_id" class="h-10 px-3 border border-outline rounded-xl bg-surface-container-low text-xs text-on-surface focus:outline-none focus:border-primary">
+                        <select v-model="form.channel_id" class="h-10 px-3 border border-outline rounded-xl bg-surface-container-low text-xs text-on-surface focus:outline-none focus:border-primary">
                             <option value="">General Feed</option>
-                                <option v-for="ch in channels" :key="ch.id" :value="ch.id">{{ ch.name }}</option>
-                            </select>
-                        </div>
+                            <option v-for="ch in channels" :key="ch.id" :value="ch.id">{{ ch.name }}</option>
+                        </select>
                     </div>
+                </div>
 
-                <!-- 2. BUTIR SOAL DENGAN SKIP LOGIC -->
+                <!-- 2. BUTIR SOAL DENGAN SKIP LOGIC & SKOR -->
                 <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-6 shadow-sm flex flex-col gap-5">
                     <div class="flex items-center justify-between select-none border-b border-outline-variant pb-3">
                         <div>
@@ -213,7 +213,7 @@ const submit = () => {
                                 <span class="material-symbols-outlined text-[18px]">alt_route</span>
                                 2. Pertanyaan & Alur ({{ form.pertanyaans.length }})
                             </h2>
-                            <p class="text-[11px] text-on-surface-variant mt-0.5">Atur alur percabangan pada tiap pilihan ganda.</p>
+                            <p class="text-[11px] text-on-surface-variant mt-0.5">Atur alur percabangan dan bobot skor pada tiap pilihan.</p>
                         </div>
                         <button type="button" @click="tambahPertanyaan" class="inline-flex items-center gap-1 px-3 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg text-xs font-bold transition-colors border-none cursor-pointer">
                             <span class="material-symbols-outlined text-[16px]">add</span>
@@ -247,21 +247,32 @@ const submit = () => {
                                     <option value="pilihan">Pilihan Ganda</option>
                                     <option value="teks">Teks</option>
                                     <option value="angka">Angka</option>
-                                    <option value="upload">Upload</option>
+                                    <option value="upload">Upload Foto</option>
                                 </select>
                             </div>
                         </div>
 
-                        <!-- OPSI PILIHAN GANDA DENGAN AKSI PERCABANGAN -->
+                        <!-- OPSI PILIHAN GANDA DENGAN PERCABANGAN & SKOR -->
                         <div v-if="q.tipe_jawaban === 'pilihan'" class="p-4 bg-surface-container-lowest rounded-xl border border-outline-variant flex flex-col gap-3">
                             <label class="text-[11px] font-bold text-on-surface flex items-center gap-1">
                                 <span class="material-symbols-outlined text-[16px] text-primary">fork_right</span>
-                                Atur Opsi Jawaban & Alur Percabangan:
+                                Atur Opsi Jawaban, Poin & Alur:
                             </label>
 
                             <div v-for="(opsi, oIdx) in q.opsi_pilihan" :key="oIdx" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-2.5 rounded-lg bg-surface-container-low border border-outline-variant/60">
                                 <!-- Teks Pilihan -->
                                 <input v-model="opsi.teks" type="text" required placeholder="Teks opsi (misal: Berjalan, Ya, Tidak)..." class="h-8 px-2.5 flex-1 border border-outline rounded-lg text-xs text-on-surface bg-surface-container-lowest focus:outline-none focus:border-primary" />
+
+                                <!-- Input Skor/Poin -->
+                                <div class="flex items-center gap-1.5 bg-surface-container-lowest px-2 py-1 rounded-lg border border-outline shrink-0">
+                                    <span class="text-[10px] font-bold text-outline uppercase select-none">Poin:</span>
+                                    <input
+                                        v-model.number="opsi.skor"
+                                        type="number"
+                                        placeholder="0"
+                                        class="w-12 h-6 text-xs text-center font-bold text-primary border-none bg-transparent focus:outline-none"
+                                    />
+                                </div>
 
                                 <!-- Pilihan Aksi Percabangan -->
                                 <div class="flex items-center gap-2">

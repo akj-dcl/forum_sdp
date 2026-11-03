@@ -9,13 +9,11 @@ use Inertia\Inertia;
 
 class SurveiController extends Controller
 {
-    // 1. Menampilkan daftar survei (Portal Survei Umum)
     public function index()
     {
         $user = auth()->user();
         $today = now()->toDateString();
 
-        // Ambil nama-nama tier dari role user
         $userTiers = $user ? $user->roles()
             ->join('role_tiers', 'roles.role_tier_id', '=', 'role_tiers.id')
             ->pluck('role_tiers.nama_tier')
@@ -69,7 +67,6 @@ class SurveiController extends Controller
         ]);
     }
 
-    // 2. Menampilkan SATU survei spesifik (Saat diklik dari Dashboard Channel)
     public function show(Request $request, $id)
     {
         $user = auth()->user();
@@ -77,7 +74,6 @@ class SurveiController extends Controller
 
         $survei = MasterSurvei::with(['pertanyaans', 'channel'])->findOrFail($id);
 
-        // Validasi Hak Akses Tier User
         $userTiers = $user ? $user->roles()
             ->join('role_tiers', 'roles.role_tier_id', '=', 'role_tiers.id')
             ->pluck('role_tiers.nama_tier')
@@ -90,7 +86,6 @@ class SurveiController extends Controller
             return redirect($redirectUrl)->with('error', 'Akun Anda tidak memiliki hak akses untuk mengisi survei ini.');
         }
 
-        // Tentukan apakah membuka respon lama (edit) atau formulir baru
         $action = $request->query('action', 'edit');
         if ($survei->batas_pengisian === 'sekali') {
             $action = 'edit';
@@ -130,7 +125,6 @@ class SurveiController extends Controller
         ]);
     }
 
-    // 3. Menyimpan jawaban survei baru
     public function store(Request $request, $id)
     {
         $user = auth()->user();
@@ -151,17 +145,19 @@ class SurveiController extends Controller
         $jawabanInput = $request->input('jawaban', []);
         $soalDilewati = $request->input('soal_dilewati', []);
         $jawabanFinal = [];
+        $totalSkor = 0;
 
         foreach ($survei->pertanyaans as $pertanyaan) {
             $qId = $pertanyaan->id;
 
-            // Logika Skip / Percabangan
             if (in_array($qId, $soalDilewati)) {
                 $jawabanFinal[$qId] = null;
                 continue;
             }
 
-            if ($pertanyaan->tipe_jawaban === 'foto') {
+            $isUpload = in_array($pertanyaan->tipe_jawaban, ['foto', 'upload']);
+
+            if ($isUpload) {
                 if ($request->hasFile("jawaban_foto.{$qId}")) {
                     $file = $request->file("jawaban_foto.{$qId}");
                     $path = $file->store('survei_lampiran', 'public');
@@ -171,9 +167,20 @@ class SurveiController extends Controller
                 }
             } else {
                 $jawabanFinal[$qId] = $jawabanInput[$qId] ?? null;
+
+                if ($pertanyaan->tipe_jawaban === 'pilihan' && !empty($jawabanFinal[$qId])) {
+                    $opsiList = $pertanyaan->opsi_pilihan ?: [];
+                    foreach ($opsiList as $opt) {
+                        $teksOpsi = is_array($opt) ? ($opt['teks'] ?? '') : $opt;
+                        $poinOpsi = is_array($opt) ? (int)($opt['skor'] ?? 0) : 0;
+                        if ($teksOpsi === $jawabanFinal[$qId]) {
+                            $totalSkor += $poinOpsi;
+                            break;
+                        }
+                    }
+                }
             }
 
-            // Validasi soal wajib diisi
             if ($pertanyaan->wajib_diisi && ($jawabanFinal[$qId] === null || $jawabanFinal[$qId] === '')) {
                 return redirect()->back()->withErrors(["jawaban.{$qId}" => "Pertanyaan ini wajib diisi."]);
             }
@@ -184,12 +191,12 @@ class SurveiController extends Controller
             'user_id' => $user->id,
             'upt_id' => $user->upt_id ?? 1,
             'jawaban' => $jawabanFinal,
+            'total_skor' => $totalSkor,
         ]);
 
         return redirect($redirectUrl)->with('success', 'Jawaban survei Anda berhasil disimpan!');
     }
 
-    // 4. Memperbarui jawaban yang sudah pernah dikirim
     public function update(Request $request, $id)
     {
         $user = auth()->user();
@@ -209,6 +216,7 @@ class SurveiController extends Controller
         $soalDilewati = $request->input('soal_dilewati', []);
         $jawabanLama = $respon->jawaban ?: [];
         $jawabanFinal = [];
+        $totalSkor = 0;
 
         foreach ($survei->pertanyaans as $pertanyaan) {
             $qId = $pertanyaan->id;
@@ -218,7 +226,9 @@ class SurveiController extends Controller
                 continue;
             }
 
-            if ($pertanyaan->tipe_jawaban === 'foto') {
+            $isUpload = in_array($pertanyaan->tipe_jawaban, ['foto', 'upload']);
+
+            if ($isUpload) {
                 if ($request->hasFile("jawaban_foto.{$qId}")) {
                     $file = $request->file("jawaban_foto.{$qId}");
                     $path = $file->store('survei_lampiran', 'public');
@@ -230,6 +240,18 @@ class SurveiController extends Controller
                 }
             } else {
                 $jawabanFinal[$qId] = $jawabanInput[$qId] ?? null;
+
+                if ($pertanyaan->tipe_jawaban === 'pilihan' && !empty($jawabanFinal[$qId])) {
+                    $opsiList = $pertanyaan->opsi_pilihan ?: [];
+                    foreach ($opsiList as $opt) {
+                        $teksOpsi = is_array($opt) ? ($opt['teks'] ?? '') : $opt;
+                        $poinOpsi = is_array($opt) ? (int)($opt['skor'] ?? 0) : 0;
+                        if ($teksOpsi === $jawabanFinal[$qId]) {
+                            $totalSkor += $poinOpsi;
+                            break;
+                        }
+                    }
+                }
             }
 
             if ($pertanyaan->wajib_diisi && ($jawabanFinal[$qId] === null || $jawabanFinal[$qId] === '')) {
@@ -239,6 +261,7 @@ class SurveiController extends Controller
 
         $respon->update([
             'jawaban' => $jawabanFinal,
+            'total_skor' => $totalSkor,
         ]);
 
         return redirect($redirectUrl)->with('success', 'Jawaban survei Anda berhasil diperbarui!');

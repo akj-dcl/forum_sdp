@@ -13,10 +13,12 @@ class ResponSurvei extends Model
         'user_id',
         'upt_id',
         'jawaban',
+        'total_skor',
     ];
 
     protected $casts = [
         'jawaban' => 'array',
+        'total_skor' => 'integer',
     ];
 
     public function survei()
